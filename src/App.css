@@ -160,7 +160,10 @@
     font-weight: 500;
     color: var(--text-primary);
     will-change: transform;
-    transition: transform 0.1s linear;
+    transform: translateZ(0);
+    /* Force GPU layer */
+    backface-visibility: hidden;
+    /* Prevent flicker */
 }
 
 .section-content {

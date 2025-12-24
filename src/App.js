@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useLayoutEffect } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './App.css';
 import {
   Header,
@@ -12,33 +14,37 @@ import {
   Footer,
 } from './components';
 
+// Register ScrollTrigger plugin
+gsap.registerPlugin(ScrollTrigger);
+
 function App() {
   const sectionsRef = useRef([]);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // Scroll-linked heading animation
-  useEffect(() => {
-    const handleScroll = () => {
+  // Smooth scroll-linked heading animation with GSAP ScrollTrigger
+  useLayoutEffect(() => {
+    // Small delay to ensure refs are populated
+    const ctx = gsap.context(() => {
       sectionsRef.current.forEach(section => {
         if (!section) return;
         const heading = section.querySelector('.section-heading');
         if (!heading) return;
 
-        const rect = section.getBoundingClientRect();
-        const windowHeight = window.innerHeight;
-        const start = windowHeight * 0.2;
-        const end = windowHeight * 0.8;
-
-        if (rect.top < end && rect.bottom > start) {
-          const progress = (start - rect.top) / (rect.height - windowHeight);
-          const clamped = Math.min(Math.max(progress, 0), 1);
-          heading.style.transform = `translateY(${clamped * 40}px)`;
-        }
+        // Create smooth scrub animation for each heading
+        gsap.to(heading, {
+          y: 60,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: section,
+            start: 'top 80%',
+            end: 'bottom 20%',
+            scrub: 0.8, // Smooth scrubbing with 0.8s lag for buttery feel
+          },
+        });
       });
-    };
+    });
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => ctx.revert(); // Cleanup
   }, []);
 
   // Lock body scroll when menu is open
