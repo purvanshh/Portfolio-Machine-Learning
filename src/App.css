@@ -431,6 +431,23 @@ a.project-card:active {
     opacity: 1;
 }
 
+.project-card-link {
+    position: relative;
+}
+
+.project-link-icon {
+    font-size: 14px;
+    color: var(--text-muted);
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: all 0.2s ease;
+}
+
+.project-card-link:hover .project-link-icon {
+    opacity: 1;
+    transform: translateX(0);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .portfolio {
