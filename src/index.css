@@ -34,6 +34,11 @@
   --left-col: 240px;
 }
 
+html {
+  background-color: #0B0D10;
+  /* Match --bg-primary manually since :root vars might not apply to html in some resets */
+}
+
 body {
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   background-color: transparent;

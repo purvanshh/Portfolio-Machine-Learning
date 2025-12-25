@@ -1,9 +1,19 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 
 export function ShaderAnimation() {
     const containerRef = useRef(null);
     const sceneRef = useRef(null);
+    const [isVisible, setIsVisible] = useState(true);
+
+    useEffect(() => {
+        // Fade out after 4 seconds to show the effect only once per load/refresh
+        const timer = setTimeout(() => {
+            setIsVisible(false);
+        }, 4000);
+
+        return () => clearTimeout(timer);
+    }, []);
 
     useEffect(() => {
         if (!containerRef.current) return;
@@ -84,13 +94,14 @@ export function ShaderAnimation() {
 
         // Animation loop
         const animate = () => {
+            // Stop animation loop if component is unmounting
+            if (!sceneRef.current) return;
+
             const animationId = requestAnimationFrame(animate);
             uniforms.time.value += 0.05;
             renderer.render(scene, camera);
 
-            if (sceneRef.current) {
-                sceneRef.current.animationId = animationId;
-            }
+            sceneRef.current.animationId = animationId;
         };
 
         // Store scene references for cleanup
@@ -119,6 +130,7 @@ export function ShaderAnimation() {
                 sceneRef.current.renderer.dispose();
                 geometry.dispose();
                 material.dispose();
+                sceneRef.current = null;
             }
         };
     }, []);
@@ -126,7 +138,7 @@ export function ShaderAnimation() {
     return (
         <div
             ref={containerRef}
-            className="shader-animation-container"
+            className={`shader-animation-container ${!isVisible ? 'fade-out' : ''}`}
         />
     );
 }
