@@ -7,4 +7,3 @@ export { default as Projects } from './Projects';
 export { default as FrontendExplorations } from './FrontendExplorations';
 export { default as Contact } from './Contact';
 export { default as Footer } from './Footer';
-export { default as LiquidEffectAnimation } from './LiquidEffectAnimation';
