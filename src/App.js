@@ -12,6 +12,7 @@ import {
   FrontendExplorations,
   Contact,
   Footer,
+  LiquidEffectAnimation,
 } from './components';
 
 // Register ScrollTrigger plugin
@@ -66,17 +67,20 @@ function App() {
   };
 
   return (
-    <div className="portfolio">
-      <MenuOverlay isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
-      <Header onMenuOpen={() => setMenuOpen(true)} />
-      <Hero />
-      <Proficiencies ref={addSectionRef} />
-      <Education ref={addSectionRef} />
-      <Projects ref={addSectionRef} />
-      <FrontendExplorations ref={addSectionRef} />
-      <Contact ref={addSectionRef} />
-      <Footer />
-    </div>
+    <>
+      <LiquidEffectAnimation />
+      <div className="portfolio">
+        <MenuOverlay isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
+        <Header onMenuOpen={() => setMenuOpen(true)} />
+        <Hero />
+        <Proficiencies ref={addSectionRef} />
+        <Education ref={addSectionRef} />
+        <Projects ref={addSectionRef} />
+        <FrontendExplorations ref={addSectionRef} />
+        <Contact ref={addSectionRef} />
+        <Footer />
+      </div>
+    </>
   );
 }
 

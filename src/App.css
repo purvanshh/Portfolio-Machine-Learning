@@ -1,5 +1,7 @@
 /* Layout */
 .portfolio {
+    position: relative;
+    z-index: 1;
     max-width: var(--content-max-width);
     margin: 0 auto;
     padding: 60px 40px 40px;
@@ -324,8 +326,10 @@ a.project-card:active {
 }
 
 .project-card:hover {
-    background: var(--bg-card-hover);
-    transform: translateY(-2px);
+    background: rgba(58, 42, 26, 0.4);
+    border-color: var(--accent-text);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(231, 195, 138, 0.1);
 }
 
 .project-icon {
