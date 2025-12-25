@@ -180,6 +180,37 @@
     margin-bottom: var(--section-gap);
 }
 
+/* Full-Screen Shader Background */
+.shader-fullscreen-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -2;
+    overflow: hidden;
+}
+
+/* Dark overlay for better text contrast */
+.shader-fullscreen-bg::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    /* Darken shader by 40% */
+    z-index: 1;
+    pointer-events: none;
+}
+
+.shader-animation-container {
+    width: 100%;
+    height: 100%;
+    background: #000;
+}
+
 .hero-name {
     font-size: 48px;
     font-weight: 600;

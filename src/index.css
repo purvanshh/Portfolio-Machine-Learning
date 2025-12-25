@@ -36,7 +36,8 @@
 
 body {
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  background-color: var(--bg-primary);
+  background-color: transparent;
+  /* Changed from var(--bg-primary) to allow shader to show */
   color: var(--text-primary);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
