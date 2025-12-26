@@ -4,7 +4,7 @@ const contactLinks = [
     { label: 'Mail →', url: 'mailto:purvanshhsahu@gmail.com' },
     { label: 'GitHub →', url: 'https://github.com/purvanshh', external: true },
     { label: 'LinkedIn →', url: 'https://linkedin.com/in/purvansh-sahu-25b24228a', external: true },
-    { label: 'Frontend Portfolio →', url: 'https://purvanshhsahu.vercel.app/', external: true },
+    { label: 'Frontend Portfolio →', url: 'https://purvansh-sahu.vercel.app/', external: true },
 ];
 
 const Contact = forwardRef((props, ref) => {
