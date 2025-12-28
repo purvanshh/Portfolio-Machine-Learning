@@ -1,5 +1,4 @@
 export { default as Header } from './Header';
-export { default as MenuOverlay } from './MenuOverlay';
 export { default as Hero } from './Hero';
 export { default as Proficiencies } from './Proficiencies';
 export { default as Education } from './Education';
@@ -8,3 +7,4 @@ export { default as FrontendExplorations } from './FrontendExplorations';
 export { default as Contact } from './Contact';
 export { default as Footer } from './Footer';
 export { default as ShaderAnimation } from './ShaderAnimation';
+

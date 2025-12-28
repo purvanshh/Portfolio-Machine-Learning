@@ -1,10 +1,9 @@
-import { useEffect, useRef, useState, useLayoutEffect } from 'react';
+import { useRef, useLayoutEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './App.css';
 import {
   Header,
-  MenuOverlay,
   Hero,
   Proficiencies,
   Education,
@@ -14,13 +13,24 @@ import {
   Footer,
   ShaderAnimation,
 } from './components';
+import HamburgerMenuOverlay from './components/ui/HamburgerMenuOverlay';
+import { Home, Briefcase, GraduationCap, FolderGit2, Palette, Mail } from 'lucide-react';
 
 // Register ScrollTrigger plugin
 gsap.registerPlugin(ScrollTrigger);
 
+// Navigation menu items
+const menuItems = [
+  { label: 'Home', icon: <Home size={24} />, href: '#top' },
+  { label: 'Proficiencies', icon: <Briefcase size={24} />, href: '#proficiencies' },
+  { label: 'Education', icon: <GraduationCap size={24} />, href: '#education' },
+  { label: 'Projects', icon: <FolderGit2 size={24} />, href: '#projects' },
+  { label: 'Frontend Explorations', icon: <Palette size={24} />, href: '#frontend' },
+  { label: 'Contact', icon: <Mail size={24} />, href: '#contact' },
+];
+
 function App() {
   const sectionsRef = useRef([]);
-  const [menuOpen, setMenuOpen] = useState(false);
 
   // Smooth scroll-linked heading animation with GSAP ScrollTrigger
   useLayoutEffect(() => {
@@ -48,18 +58,6 @@ function App() {
     return () => ctx.revert(); // Cleanup
   }, []);
 
-  // Lock body scroll when menu is open
-  useEffect(() => {
-    if (menuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [menuOpen]);
-
   const addSectionRef = (el) => {
     if (el && !sectionsRef.current.includes(el)) {
       sectionsRef.current.push(el);
@@ -71,9 +69,21 @@ function App() {
       <div className="shader-fullscreen-bg">
         <ShaderAnimation />
       </div>
+      <HamburgerMenuOverlay
+        items={menuItems}
+        buttonTop="50px"
+        buttonLeft="calc(100% - 50px)"
+        buttonSize="md"
+        buttonColor="rgba(20, 20, 35, 0.9)"
+        overlayBackground="linear-gradient(135deg, rgba(10, 10, 20, 0.98) 0%, rgba(20, 20, 40, 0.98) 50%, rgba(10, 10, 25, 0.98) 100%)"
+        textColor="#ffffff"
+        fontSize="lg"
+        enableBlur={true}
+        animationDuration={0.8}
+        staggerDelay={0.06}
+      />
       <div className="portfolio">
-        <MenuOverlay isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
-        <Header onMenuOpen={() => setMenuOpen(true)} />
+        <Header />
         <Hero />
         <Proficiencies ref={addSectionRef} />
         <Education ref={addSectionRef} />
