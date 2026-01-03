@@ -7,10 +7,10 @@ export function ShaderAnimation() {
     const [isVisible, setIsVisible] = useState(true);
 
     useEffect(() => {
-        // Fade out after 4 seconds to show the effect only once per load/refresh
+        // Fade out after 6 seconds to show the effect only once per load/refresh
         const timer = setTimeout(() => {
             setIsVisible(false);
-        }, 4000);
+        }, 6000);
 
         return () => clearTimeout(timer);
     }, []);

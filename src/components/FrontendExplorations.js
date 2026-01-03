@@ -1,23 +1,34 @@
 import React, { forwardRef } from 'react';
+import { Plane, Video, Croissant, Stethoscope } from 'lucide-react';
 
 const frontendProjects = [
     {
-        icon: '💪',
-        name: 'FitTrack Pro',
-        description: 'A comprehensive React Native fitness companion that tracks workouts, monitors daily meal intake, logs water consumption, and counts footsteps in real-time. Released as an APK on GitHub for seamless health management.',
-        github: 'https://github.com/purvanshh/fittrack-pro',
+        icon: <Plane size={32} />,
+        name: 'Travel Planner',
+        description: 'A seamless travel planning interface designed to help users organize itineraries, discover destinations, and manage trip details with a modern, intuitive UI.',
+        url: 'https://travel-planner-rho-three.vercel.app/',
+        github: 'https://github.com/purvanshh/travel-planner',
     },
     {
-        icon: '💰',
-        name: 'PocketExpense+',
-        description: 'An intelligent expense tracking mobile app featuring secure authentication, dynamic spending analytics with interactive graphs, and smart suggestions to help users optimize their financial habits.',
-        github: 'https://github.com/purvanshh/PocketExpense-',
+        icon: <Video size={32} />,
+        name: 'Content Creator',
+        description: 'A personal portfolio hub for digital creators, featuring a sleek design to showcase videos, social media presence, and creative projects in one unified space.',
+        url: 'https://content-creator-sage.vercel.app/',
+        github: 'https://github.com/purvanshh/content-creator',
     },
     {
-        icon: '🛒',
-        name: 'FarmFresh',
-        description: 'A sleek quick-commerce grocery application with seamless payment integration, intuitive UI/UX design, and comprehensive order history tracking for a delightful shopping experience.',
-        github: 'https://github.com/purvanshh/Quick-E-Commerce',
+        icon: <Croissant size={32} />,
+        name: 'Bakery Landing',
+        description: 'An enticing landing page for an artisanal bakery, combining warm aesthetics with mouth-watering product showcases to drive customer engagement and orders.',
+        url: 'https://bakery-landing-one.vercel.app/',
+        github: 'https://github.com/purvanshh/bakery-landing',
+    },
+    {
+        icon: <Stethoscope size={32} />,
+        name: 'Dentist Landing',
+        description: 'A professional, trustworthy web presence for a dental clinic, emphasizing service clarity, appointment booking, and patient comfort in a clean, sterile design.',
+        url: 'https://dentist-landing-brch.vercel.app/',
+        github: 'https://github.com/purvanshh/dentist-landing',
     },
 ];
 
@@ -29,7 +40,7 @@ const FrontendExplorations = forwardRef((props, ref) => {
                 {frontendProjects.map((project) => (
                     <a
                         key={project.name}
-                        href={project.github}
+                        href={project.url}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="project-card project-card-muted project-card-link"
