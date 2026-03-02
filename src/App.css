@@ -170,6 +170,9 @@
     display: flex;
     flex-direction: column;
     gap: 32px;
+    border-left: 2px solid var(--accent-text);
+    padding-left: 16px;
+    align-self: start;
 }
 
 /* Hero */
@@ -266,6 +269,12 @@
     font-size: 13px;
     color: var(--text-dim);
     line-height: 1.6;
+}
+
+/* Experience Highlight */
+.experience-highlight {
+    border-left: 2px solid var(--accent-text);
+    padding-left: 16px;
 }
 
 /* Proficiencies */

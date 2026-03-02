@@ -5,6 +5,7 @@ import './App.css';
 import {
   Header,
   Hero,
+  Experience,
   Proficiencies,
   Education,
   Projects,
@@ -22,6 +23,7 @@ gsap.registerPlugin(ScrollTrigger);
 // Navigation menu items
 const menuItems = [
   { label: 'Home', icon: <Home size={24} />, href: '#top' },
+  { label: 'Experience', icon: <Briefcase size={24} />, href: '#experience' },
   { label: 'Proficiencies', icon: <Briefcase size={24} />, href: '#proficiencies' },
   { label: 'Education', icon: <GraduationCap size={24} />, href: '#education' },
   { label: 'Projects', icon: <FolderGit2 size={24} />, href: '#projects' },
@@ -85,6 +87,7 @@ function App() {
       <div className="portfolio">
         <Header />
         <Hero />
+        <Experience ref={addSectionRef} />
         <Proficiencies ref={addSectionRef} />
         <Education ref={addSectionRef} />
         <Projects ref={addSectionRef} />
