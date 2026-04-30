@@ -5,17 +5,18 @@ import './App.css';
 import {
   Header,
   Hero,
+  EngineeringThesis,
   Experience,
   Proficiencies,
   Education,
   Projects,
-  FrontendExplorations,
+  SystemDesign,
   Contact,
   Footer,
   ShaderAnimation,
 } from './components';
 import HamburgerMenuOverlay from './components/ui/HamburgerMenuOverlay';
-import { Home, Briefcase, GraduationCap, FolderGit2, Palette, Mail } from 'lucide-react';
+import { Home, Crosshair, Briefcase, FolderGit2, Layers, Wrench, GraduationCap, Mail } from 'lucide-react';
 
 // Register ScrollTrigger plugin
 gsap.registerPlugin(ScrollTrigger);
@@ -23,11 +24,12 @@ gsap.registerPlugin(ScrollTrigger);
 // Navigation menu items
 const menuItems = [
   { label: 'Home', icon: <Home size={24} />, href: '#top' },
+  { label: 'Thesis', icon: <Crosshair size={24} />, href: '#thesis' },
   { label: 'Experience', icon: <Briefcase size={24} />, href: '#experience' },
-  { label: 'Proficiencies', icon: <Briefcase size={24} />, href: '#proficiencies' },
-  { label: 'Education', icon: <GraduationCap size={24} />, href: '#education' },
   { label: 'Projects', icon: <FolderGit2 size={24} />, href: '#projects' },
-  { label: 'Frontend Explorations', icon: <Palette size={24} />, href: '#frontend' },
+  { label: 'Proficiencies', icon: <Wrench size={24} />, href: '#proficiencies' },
+  { label: 'Education', icon: <GraduationCap size={24} />, href: '#education' },
+  { label: 'System Design', icon: <Layers size={24} />, href: '#system-design' },
   { label: 'Contact', icon: <Mail size={24} />, href: '#contact' },
 ];
 
@@ -87,11 +89,12 @@ function App() {
       <div className="portfolio">
         <Header />
         <Hero />
+        <EngineeringThesis ref={addSectionRef} />
         <Experience ref={addSectionRef} />
+        <Projects ref={addSectionRef} />
         <Proficiencies ref={addSectionRef} />
         <Education ref={addSectionRef} />
-        <Projects ref={addSectionRef} />
-        <FrontendExplorations ref={addSectionRef} />
+        <SystemDesign ref={addSectionRef} />
         <Contact ref={addSectionRef} />
         <Footer />
       </div>

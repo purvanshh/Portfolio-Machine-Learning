@@ -15,9 +15,23 @@ const Experience = forwardRef((props, ref) => {
                         <span>·</span>
                         <span>IIT Madras (with ICAR–NRCB)</span>
                     </div>
-                    <div className="entry-description">
-                        Working on applied machine learning for agricultural systems, focusing on crop health analysis using drone imagery and structured field data. Designed reproducible data pipelines, implemented robust evaluation workflows, and performed systematic error analysis to improve model generalization under real-world variability (seasonal shifts, illumination changes, heterogeneous crop conditions). Conducted data quality validation, cross-domain testing, and controlled ablation studies to identify failure modes and strengthen model reliability. Collaborated closely with ICAR researchers to align modeling outputs with practical agronomic constraints and field-level decision requirements.
-                    </div>
+                    <ul className="experience-bullets">
+                        <li>
+                            Built crop health classification pipeline for drone imagery across multiple ICAR field sites - designed to generalize under seasonal variation, illumination shifts, and heterogeneous crop conditions
+                        </li>
+                        <li>
+                            Ran controlled ablation studies to isolate failure modes: measured individual impact of illumination normalization, augmentation strategies, and feature subsets on cross-site accuracy
+                        </li>
+                        <li>
+                            Implemented automated data quality validation - flagging mislabeled samples, corrupt captures, and annotation drift before they entered the training loop
+                        </li>
+                        <li>
+                            Separated in-distribution accuracy from cross-domain robustness in evaluation - different metrics for "does it work here" vs "will it transfer there"
+                        </li>
+                        <li>
+                            Set model confidence thresholds with ICAR agronomists tied to field-level action boundaries - predictions below threshold route to manual inspection, not automated decisions
+                        </li>
+                    </ul>
                 </div>
             </div>
         </section>

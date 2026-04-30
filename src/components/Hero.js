@@ -7,7 +7,6 @@ function Hero() {
             <div className="hero-right">
                 <div className="hero-about">
                     <div className="hero-role">ML Research Intern @ IIT Madras | Applied AI Systems</div>
-                    <div className="hero-role-secondary">Frontend development as a supporting craft for ML products</div>
                     <div className="hero-status">
                         <span>Bangalore, India</span>
                         <span>+91 91713 03506</span>
