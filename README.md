@@ -1,68 +1,70 @@
-# Purvansh Sahu | AI/ML Portfolio
+# Purvansh Sahu — ML Systems Portfolio
 
-A modern, interactive portfolio website showcasing my projects and expertise in Artificial Intelligence and Machine Learning.
+Personal portfolio focused on applied ML systems engineering. Built with React.
 
-## 🌟 Features
+**Live:** [purvanshsahu.vercel.app](https://purvanshsahu.vercel.app)
 
-- **Interactive 3D Background** - Powered by Spline for an immersive experience
-- **Smooth Animations** - Engaging UI transitions and effects
-- **Project Showcase** - Highlights of key AI/ML projects
-- **Responsive Design** - Optimized for all devices
-- **Modern Tech Stack** - Built with React.js
+## What's in it
 
-## 🚀 Live Demo
+- **Engineering Thesis** — Positioning statement on building trustable ML systems
+- **Experience** — ML research at IIT Madras (with ICAR-NRCB)
+- **Projects** — Four production-oriented ML systems with technical depth:
+  - PRGuard AI — Multi-agent PR review with confidence arbitration
+  - Document Intelligence Engine — LayoutLMv3 + deterministic post-processing
+  - GitHub Codebase Intelligence — Graph-aware RAG for code understanding
+  - AuditLend — Credit decision engine with audit trail
+- **System Design** — Architecture deep-dives with pipeline flows, failure paths, decision logic, and engineering tradeoffs
+- **Proficiencies** — ML/Modeling, Systems/Backend, Tools/Infra
 
-Visit the portfolio: [purvansh.dev](https://purvansh.dev) *(update with your actual URL)*
+## Tech Stack
 
-## 🛠️ Tech Stack
+- React.js
+- GSAP + ScrollTrigger (scroll-linked animations)
+- Lucide React (icons)
+- Custom shader background (WebGL)
+- Vanilla CSS
 
-- **Frontend**: React.js
-- **3D Graphics**: Spline
-- **Styling**: CSS3 with modern animations
-- **Deployment**: GitHub Pages / Vercel
-
-## 📦 Installation
+## Run locally
 
 ```bash
-# Clone the repository
 git clone https://github.com/purvanshh/Portfolio-Machine-Learning.git
-
-# Navigate to the project directory
 cd Portfolio-Machine-Learning
-
-# Install dependencies
 npm install
-
-# Start the development server
 npm start
 ```
 
-The app will be available at [http://localhost:3000](http://localhost:3000)
+Opens at [http://localhost:3000](http://localhost:3000).
 
-## 📂 Project Structure
+## Structure
 
 ```
-portfolio-machine-learning/
-├── public/
-│   ├── index.html
-│   └── assets/
-├── src/
-│   ├── components/
-│   ├── App.js
-│   ├── App.css
-│   └── index.js
-└── README.md
+src/
+├── components/
+│   ├── Hero.js
+│   ├── EngineeringThesis.js
+│   ├── Experience.js
+│   ├── Projects.js
+│   ├── SystemDesign.js
+│   ├── Proficiencies.js
+│   ├── Education.js
+│   ├── Contact.js
+│   ├── Header.js
+│   ├── Footer.js
+│   ├── ShaderAnimation.js
+│   └── ui/
+│       └── HamburgerMenuOverlay.js
+├── App.js
+├── App.css
+├── index.css
+└── index.js
 ```
 
-## 🤝 Connect With Me
+## Contact
 
-- **GitHub**: [@purvanshh](https://github.com/purvanshh)
-- **LinkedIn**: [Purvansh Sahu](https://www.linkedin.com/in/purvansh-sahu)
+- GitHub: [@purvanshh](https://github.com/purvanshh)
+- LinkedIn: [Purvansh Sahu](https://www.linkedin.com/in/purvansh-sahu-25b24228a)
+- Email: purvanshhsahu@gmail.com
 
-## 📄 License
+## License
 
-This project is open source and available under the [MIT License](LICENSE).
-
----
-
-⭐ If you found this portfolio interesting, feel free to star the repository!
+MIT
