@@ -1,7 +1,32 @@
 import React, { forwardRef, useState } from 'react';
-import { Shield, FileSearch, GitBranch, Landmark, ChevronDown, Github } from 'lucide-react';
+import { Shield, FileSearch, GitBranch, Landmark, ChevronDown, Github, Activity } from 'lucide-react';
 
 const projects = [
+    {
+        icon: <Activity size={28} />,
+        name: 'SentinelOps AI',
+        problem:
+            'Automated incident reasoning systems often hallucinate under pressure, lack deterministic safety gates, and fail when primary APIs error. SRE operations require auditable reasoning and strict operator control.',
+        approach: [
+            'FastAPI control plane manages incident state, approvals, dynamic evaluations, and WebSocket telemetry streaming',
+            'LangGraph StateGraph deterministically orchestrates the incident pipeline (from triage and concurrent evidence collection to risk analysis)',
+            'Root-cause engine algorithmically scores candidates and estimates blast radius via static topology traversal and Monte Carlo simulations',
+        ],
+        failureFix:
+            'Integrated a multi-layer provider resilience chain (Primary API → Secondary Provider → Local Ollama → Deterministic Rule Classifier) to prevent execution halts during API outages.',
+        differentiators: [
+            'Telemetry Integrity Scoring: Detects gaps, completeness, and corruption in incoming metrics/logs before reasoning',
+            'Causal Ambiguity Detection: Resolves causal conflicts into stable, competing, or insufficient evidence states',
+            'Durable Operator Escalations: Human-in-the-loop validation triggers on low confidence, high blast radius, or telemetry blackouts',
+        ],
+        tech: 'Python · FastAPI · LangGraph · Redis · Celery · PostgreSQL · Qdrant · Prometheus · Next.js',
+        results: [
+            'Attains 0.9917 router consistency and 100% dangerous remediation rejection rate under red-team evaluation',
+            'Maintains operational survivability with automatic fallback modes: Full, Degraded, Local_Only, Safe_Mode, and Observe_Only',
+            'Verified via a deterministic replay benchmark suite containing 121 incidents and 40 operational chaos scenarios',
+        ],
+        github: 'https://github.com/purvanshh/SentinalOps',
+    },
     {
         icon: <Shield size={28} />,
         name: 'PRGuard AI',
