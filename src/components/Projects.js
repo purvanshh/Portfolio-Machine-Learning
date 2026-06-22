@@ -26,6 +26,18 @@ const projects = [
             'Verified via a deterministic replay benchmark suite containing 121 incidents and 40 operational chaos scenarios',
         ],
         github: 'https://github.com/purvanshh/SentinalOps',
+        limitations: [
+            'Simulation-Only Validation: Evaluations are performed on synthetic incident datasets and chaos-injected replays rather than live production environments.',
+            'LLM Non-Determinism: Core reasoning relies on external LLM APIs, where outputs can vary across runs even with pinned seeds.',
+            'Uncalibrated Confidence Scoring: Confidence bounds are derived from heuristic evidence weights and are not yet empirically calibrated.',
+            'In-Process Checkpoint Persistence: Workflows use an in-process MemorySaver, meaning cross-process interrupt and resume is not supported.',
+        ],
+        futureImprovements: [
+            'Enriching Mock Evidence: Injecting configuration changes and causal dependency metadata into the evaluation harness.',
+            'Learned Causality: Replacing rule-based candidate scoring with statistically grounded causal inference models.',
+            'Live Telemetry Connectors: Migrating evidence agents from mocked clients to production-ready Prometheus, Loki, and GitHub integrations.',
+            'Durable Checkpointing: Integrating langgraph-checkpoint-postgres for persistent cross-process state management.',
+        ],
     },
     {
         icon: <Shield size={28} />,
@@ -192,6 +204,28 @@ const ProjectCard = ({ project }) => {
                             ))}
                         </ul>
                     </div>
+
+                    {project.limitations && (
+                        <div className="project-section">
+                            <div className="project-section-title">Current Limitations</div>
+                            <ul className="project-section-list">
+                                {project.limitations.map((item, i) => (
+                                    <li key={i}>{item}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+
+                    {project.futureImprovements && (
+                        <div className="project-section">
+                            <div className="project-section-title">Future Improvements</div>
+                            <ul className="project-section-list">
+                                {project.futureImprovements.map((item, i) => (
+                                    <li key={i}>{item}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
 
                     <div className="project-links">
                         <a
