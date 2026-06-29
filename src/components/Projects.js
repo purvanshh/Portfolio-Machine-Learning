@@ -29,28 +29,28 @@ const projects = [
     },
     {
         icon: <FileSearch size={28} />,
-        name: 'Document Intelligence Engine',
+        name: 'DRISE',
         problem:
-            'OCR-only systems collapse on multi-column layouts. LLM extractors are non-deterministic - same input, different output. Neither is production-safe.',
+            'OCR-only pipelines lack spatial layout awareness and collapse on tables or multi-column layouts, while LLM extractors are non-deterministic, have high hallucinations, and are expensive at scale.',
         approach: [
-            'PaddleOCR extracts tokens + bounding boxes → LayoutLMv3 classifies per-token as KEY/VALUE/OTHER using joint pixel-layout-text encoding',
-            'Three-layer deterministic post-processing: OCR artifact correction (O→0, l→1 in numeric context) → field normalization (date→ISO 8601, currency→float) → cross-field constraint validation',
-            'Every field carries explicit valid boolean, confidence score, and correction provenance. Constraint violations are flagged, not silenced.',
+            'Combines a layout-aware multimodal transformer (LayoutLMv3) with a deterministic post-processing pipeline',
+            'Ingests documents via FastAPI, normalizes page images, and extracts text/bounding boxes using PaddleOCR',
+            'Classifies tokens (KEY/VALUE/O) through LayoutLMv3, followed by regex validation and cross-field constraint enforcement',
         ],
         failureFix:
-            'Raw model output had ~15–25% error rate from OCR character misreads. Context-aware artifact correction in the post-processing layer recovered these without retraining the model.',
+            'Raw OCR character misreads (e.g. O instead of 0) caused constraint errors. Context-aware artifact correction in the post-processing layer recovered these errors without model retraining.',
         differentiators: [
-            'Deterministic guarantee: same document → same JSON, every run',
-            'Post-processing makes model output production-safe without model changes',
-            'Built-in ablation framework: remove layout, remove post-processing, degrade OCR - all runnable',
+            'Deterministic post-processing guarantees identical output for identical inputs',
+            'Spatial layout awareness via LayoutLMv3 coordinates encoding',
+            'Defense-in-depth security with file extension, MIME type, and magic-byte checks',
         ],
         tech: 'Python · PyTorch · LayoutLMv3 · PaddleOCR · FastAPI · Docker',
         results: [
-            'Target F1 ≥ 0.80 on key-value extraction (FUNSD, CORD datasets)',
-            '+15–25% accuracy recovery vs raw OCR through deterministic correction',
-            'p99 API latency <2s, batch endpoint for multi-file ingestion',
+            'Achieves 100% schema validity and sub-300ms average latency',
+            'Reaches 0.58 Field F1 on held-out test splits, statistically beating LLM baselines',
+            'Built-in ablation framework evaluating spatial and constraint contributions',
         ],
-        github: 'https://github.com/purvanshh/document-intelligence-engine',
+        github: 'https://github.com/purvanshh/DRISE-experiments',
     },
     {
         icon: <GitBranch size={28} />,
@@ -79,29 +79,28 @@ const projects = [
     },
     {
         icon: <Landmark size={28} />,
-        name: 'AuditLend',
+        name: 'ALICe',
         problem:
-            'Credit decisions must be explainable, auditable, and deterministic. Most systems mix scoring with side effects, produce no audit trail, and can\'t be tested against failure scenarios.',
+            'Credit decisions must be explainable, auditable, and deterministic. Under degraded data conditions, typical systems fail silently or compute biased/unreliable risk scores.',
         approach: [
-            'Idempotent intake with transactional outbox - API write + task intent committed atomically to PostgreSQL',
-            'Worker claims via atomic UPDATE WHERE status=PENDING → fetches external data (credit, bank, GST) → reuses already-persisted fetches on retry',
-            'Three separate output fields: risk_score, data_reliability, confidence - fallback data reduces confidence and routes to manual review',
-            'Explanation endpoint reads from append-only audit trail, not recomputation',
+            'Idempotent intake with transactional outbox committing API write and Celery task delivery intent atomically to PostgreSQL',
+            'Worker claims task with atomic UPDATE and fetches or reuses cached credit, bank, and GST snapshots',
+            'Orchestrates decisions using weighted risk, data reliability, calibrated confidence, and optional XGB_V1 ML scoring with fallback',
         ],
         failureFix:
-            'Direct Celery dispatch from the API caused silent task loss on network failures. Transactional outbox - committing task intent alongside the database write - eliminated the failure window.',
+            'External service timeouts caused silent task loss. Implementing transactional outbox and circuit breakers with fallback logic guaranteed no applications are lost.',
         differentiators: [
-            'Explanation matches what happened - derived from audit logs, not fresh computation',
-            'Deterministic mock services with 4 failure modes each enable chaos testing',
-            'Append-only audit log enforced by DB trigger - application code cannot tamper',
+            'Explainable AI with SHAP-based feature contribution and audit-derived timelines',
+            'Immutable audit log enforced by PostgreSQL database trigger preventing updates/deletes',
+            'Resilient circuit breaker with half-open probe lock and automatic fallback to heuristics',
         ],
-        tech: 'Python · FastAPI · Celery · PostgreSQL · Redis · SQLAlchemy · Docker · Prometheus',
+        tech: 'Python · FastAPI · Celery · PostgreSQL · Redis · XGBoost · SHAP · Docker · Prometheus',
         results: [
-            '124 tests passing, 87.24% coverage (85% gate)',
-            'Circuit breaker with half-open probe lock, retry/backoff, idempotent intake',
-            'Full e2e: intake → outbox → worker → decision → audit → explanation',
+            'XGB_V1 model evaluated with 0.975 AUC-ROC and 0.025 Brier score',
+            'Zero-skip test suite passing with 86% code coverage',
+            'Simulated profit improvement of +$68.3M over baseline heuristics',
         ],
-        github: 'https://github.com/purvanshh/AuditLend',
+        github: 'https://github.com/purvanshh/AuditLend-Intelligence-Core--ALICe-',
     },
 ];
 
