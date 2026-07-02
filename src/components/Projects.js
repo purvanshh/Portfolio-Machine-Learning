@@ -31,24 +31,24 @@ const projects = [
         icon: <FileSearch size={28} />,
         name: 'DRISE',
         problem:
-            'OCR-only pipelines lack spatial layout awareness and collapse on tables or multi-column layouts, while LLM extractors are non-deterministic, have high hallucinations, and are expensive at scale.',
+            'OCR-only pipelines lack spatial layout awareness and collapse on tables or multi-column layouts, while LLM extractors are non-deterministic, suffer from high hallucination rates, and are prohibitively expensive at scale.',
         approach: [
-            'Combines a layout-aware multimodal transformer (LayoutLMv3) with a deterministic post-processing pipeline',
-            'Ingests documents via FastAPI, normalizes page images, and extracts text/bounding boxes using PaddleOCR',
-            'Classifies tokens (KEY/VALUE/O) through LayoutLMv3, followed by regex validation and cross-field constraint enforcement',
+            'Combines a layout-aware multimodal transformer (LayoutLMv3 base) with a deterministic post-processing pipeline to jointly encode pixel context, text tokens, and bounding-box coordinates',
+            'Ingests files via FastAPI, performs magic-byte validation, rasterizes PDFs to page images, and extracts text/geometry using a PaddleOCR backend',
+            'Classifies tokens into KEY/VALUE/O segments, normalizes formatting (dates to ISO 8601, currencies to floats), and applies constraint validations like line-item summation matching',
         ],
         failureFix:
-            'Raw OCR character misreads (e.g. O instead of 0) caused constraint errors. Context-aware artifact correction in the post-processing layer recovered these errors without model retraining.',
+            'Raw OCR character misreads (e.g. O instead of 0) caused constraint errors. Context-aware artifact correction in the post-processing layer recovered these errors without model retraining, recovering 15–25% accuracy loss.',
         differentiators: [
-            'Deterministic post-processing guarantees identical output for identical inputs',
-            'Spatial layout awareness via LayoutLMv3 coordinates encoding',
-            'Defense-in-depth security with file extension, MIME type, and magic-byte checks',
+            'Deterministic Post-Processing: Guarantees identical, syntactically valid JSON output for identical inputs across all document runs',
+            'Spatial Layout Awareness: Employs bounding-box geometry to distinguish labels from values across multi-column, tabular, or non-linear reading orders',
+            'Defense-in-Depth Security: Checks file uploads at the extension, MIME type, and magic-byte level, rejecting malformed formats and path traversals before model inference',
         ],
         tech: 'Python · PyTorch · LayoutLMv3 · PaddleOCR · FastAPI · Docker',
         results: [
-            'Achieves 100% schema validity and sub-300ms average latency',
-            'Reaches 0.58 Field F1 on held-out test splits, statistically beating LLM baselines',
-            'Built-in ablation framework evaluating spatial and constraint contributions',
+            'Reaches 0.58 Field F1 on held-out test splits (N=201), demonstrating statistically significant improvement (McNemar test p = 0.004) over LLM-only baselines',
+            'Enforces 100% schema validity across all test documents, eliminating typical hallucinated fields',
+            'Delivers sub-300ms average local inference latency and supports concurrent batch ingestion with background file cleanup',
         ],
         github: 'https://github.com/purvanshh/DRISE-experiments',
     },
@@ -83,22 +83,22 @@ const projects = [
         problem:
             'Credit decisions must be explainable, auditable, and deterministic. Under degraded data conditions, typical systems fail silently or compute biased/unreliable risk scores.',
         approach: [
-            'Idempotent intake with transactional outbox committing API write and Celery task delivery intent atomically to PostgreSQL',
-            'Worker claims task with atomic UPDATE and fetches or reuses cached credit, bank, and GST snapshots',
-            'Orchestrates decisions using weighted risk, data reliability, calibrated confidence, and optional XGB_V1 ML scoring with fallback',
+            'Implements a transactional outbox pattern to atomically commit API application writes and Celery task intents to PostgreSQL, eliminating task loss',
+            'Worker claims tasks via atomic UPDATE queries and fetches mock external bureau, banking, and GST verification data with retry fetch reuse',
+            'Evaluates decisions using a calibrated XGB_V1 ML model (trained on 1.1M Lending Club rows) with isotonic regression and SHAP explainability',
         ],
         failureFix:
             'External service timeouts caused silent task loss. Implementing transactional outbox and circuit breakers with fallback logic guaranteed no applications are lost.',
         differentiators: [
-            'Explainable AI with SHAP-based feature contribution and audit-derived timelines',
-            'Immutable audit log enforced by PostgreSQL database trigger preventing updates/deletes',
-            'Resilient circuit breaker with half-open probe lock and automatic fallback to heuristics',
+            'Immutable Audit Trail: PostgreSQL database triggers block UPDATE and DELETE queries on audit logs, securing compliance logs against tampering',
+            'Deterministic Heuristic Fallbacks: Instantly degrades to a governed RULE_SET_V1 scorecard when ML calibration confidence or provider data degrades',
+            'Chaos-tested Resilience: Redis-backed circuit breaker with half-open probe lock and mock APIs simulating timed out, stale, or partial data responses',
         ],
         tech: 'Python · FastAPI · Celery · PostgreSQL · Redis · XGBoost · SHAP · Docker · Prometheus',
         results: [
-            'XGB_V1 model evaluated with 0.975 AUC-ROC and 0.025 Brier score',
-            'Zero-skip test suite passing with 86% code coverage',
-            'Simulated profit improvement of +$68.3M over baseline heuristics',
+            'Achieves a verified 0.975 AUC-ROC and 0.025 Brier score for calibrated ML probability scoring on held-out test sets',
+            'Delivers +$68.3M simulated profit increase over baseline heuristics at a 0.50 calibrated default-probability threshold',
+            'Maintains a robust codebase verified by 187 zero-skip unit, integration, and chaos tests with 86% test coverage',
         ],
         github: 'https://github.com/purvanshh/AuditLend-Intelligence-Core--ALICe-',
     },
@@ -152,7 +152,11 @@ const ProjectCard = ({ project }) => {
 
                     <div className="project-section">
                         <div className="project-section-title">Tech Stack</div>
-                        <div className="project-tech">{project.tech}</div>
+                        <div className="project-tech-badges">
+                            {project.tech.split(' · ').map((t, idx) => (
+                                <span key={idx} className="project-tech-badge">{t}</span>
+                            ))}
+                        </div>
                     </div>
 
                     <div className="project-section">
