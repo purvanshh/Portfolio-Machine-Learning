@@ -189,7 +189,7 @@ const SystemCard = ({ system }) => (
                 <div className="sd-card-name">{system.name}</div>
                 <div className="sd-card-tagline">{system.tagline}</div>
             </div>
-            <a href={system.github} target="_blank" rel="noopener noreferrer" className="project-link">
+            <a href={system.github} target="_blank" rel="noopener noreferrer" className="project-link" aria-label={`GitHub repository for ${system.name} system design`}>
                 <Github size={14} /> GitHub
             </a>
         </div>

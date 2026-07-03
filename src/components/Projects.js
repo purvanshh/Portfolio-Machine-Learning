@@ -174,6 +174,7 @@ const ProjectCard = ({ project }) => {
                             target="_blank"
                             rel="noopener noreferrer"
                             className="project-link"
+                            aria-label={`GitHub repository for ${project.name}`}
                         >
                             <Github size={14} />
                             GitHub
