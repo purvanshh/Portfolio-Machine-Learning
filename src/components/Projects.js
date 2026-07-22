@@ -43,26 +43,43 @@ const projects = [
         icon: <Shield size={28} />,
         name: 'PRGuard AI',
         problem:
-            'Automated linters catch syntax errors. Human reviewers miss security flaws under fatigue. Neither produces structured confidence scores for findings.',
+            'Code review is a bottleneck: it consumes senior developer hours, slows delivery, and vulnerabilities slip through when reviews are rushed. Automated linters catch syntax errors; human reviewers miss security flaws under fatigue. Neither produces structured confidence scores for findings.',
         approach: [
-            'Three parallel Celery agents (Style, Logic, Security) - each combines deterministic rule checks with LLM reasoning on dedicated queues',
-            'Style agent retrieves repo conventions from ChromaDB; Logic agent feeds tree-sitter AST summaries to LLM; Security agent runs regex + prompt-based vulnerability detection',
-            'Confidence Arbitrator assigns weighted scores (rule-based: 0.9, LLM: 0.6, inferred: 0.3) and detects inter-agent disagreements',
+            'Three parallel Celery agents (Style, Logic, Security) on dedicated queues — each combines deterministic rule checks with LLM reasoning and runs in under 5 minutes with autoretry/backoff',
+            'Style agent retrieves semantically similar code from ChromaDB for project-specific conventions; Logic agent feeds tree-sitter AST summaries (Python/Go/TypeScript/Rust) to the LLM; Security agent runs regex + security-prompted LLM detection',
+            'Refinement loop (rounds 1–3) with a Coordinator agent and a Confidence Arbitrator that assigns weighted scores (rule_based: 0.9, llm_reasoning: 0.6, inferred: 0.3) and detects cross-concern disagreements',
+            'Full webhook security pipeline: HMAC-SHA256 verification, replay protection (Redis, 5-min TTL), timestamp validation, per-repo/IP rate limiting, sandboxed repo clones with LRU-evicted caching',
         ],
         failureFix:
-            'Single-agent design produced noisy, inconsistent severity ratings. Splitting into three domain-specific agents with independent scoring surfaced cross-concern disagreements a single agent misses.',
+            'The batch review script silently killed all 4 workers when a single thread hit a JSONDecodeError from a truncated LLM response. The fix: wrapped json.loads() in try/except to record raw responses instead of crashing, switched from end-of-batch writes to per-PR incremental checkpoints, and added a --resume flag that skips completed PRs by reading the partial results file.',
         differentiators: [
-            'Disagreement detection - flags when agents disagree on severity across concerns',
-            'Hybrid scoring prevents confidence inflation from speculative LLM findings',
-            'Full webhook security: HMAC, replay protection, rate limiting, sandboxed clones',
+            'Disagreement detection — flags when one agent reports high-severity findings that another does not',
+            'Hybrid confidence scoring prevents inflation from speculative LLM output',
+            'Production-grade security: HMAC, replay protection, rate limiting, sandboxed clones, payload size limits',
+            'Structured JSON logging with OpenTelemetry trace propagation, Prometheus metrics, WebSocket live streaming',
         ],
-        tech: 'Python · FastAPI · Celery · Redis · ChromaDB · tree-sitter · NVIDIA NIM',
+        tech: 'Python · FastAPI · Celery · Redis · ChromaDB · tree-sitter · DeepSeek API · PostgreSQL · Docker',
         results: [
-            'Catches command injection, SQL injection, hardcoded secrets in test PRs with planted bugs',
-            'Precision/recall evaluation framework against hand-labeled datasets',
-            'Async pipeline with retry/backoff, <30s median review time per PR',
+            '0.92 F1 (0.92 precision, 0.92 recall) on 50 real-world CVE-fix PRs from python/cpython and nodejs/node',
+            '0.82 F1 on synthetic benchmark of 200 fixture PRs (CI/regression gate)',
+            'Catches command injection, SQL injection, hardcoded secrets, bare excepts, off-by-one errors across 288 test cases at 77% coverage',
+            'Async pipeline with retry/backoff, circuit breakers, token budgeting, <30s median review time per PR',
         ],
         github: 'https://github.com/purvanshh/PRGuard-AI',
+        limitations: [
+            'Rule-based detectors are shallow — regex heuristics produce false positives on complex code (not a replacement for Semgrep/CodeQL)',
+            'Multi-language support is uneven — AST parsing is Python-heavy; Go/TypeScript/Rust rely almost entirely on the LLM pass',
+            'No incremental analysis — every PR is fully re-analysed without diff-aware caching across sequential PRs',
+            'Chunked PR analysis not yet implemented — PRs exceeding 50 files or 5000 lines are truncated rather than chunked and merged',
+            'Secret scanning is regex-only — no entropy analysis or pre-commit hook integration; misses obfuscated JWT tokens',
+        ],
+        futureImprovements: [
+            'Integrate CodeQL or Semgrep for deep static analysis across all supported languages',
+            'Implement diff-aware caching for file-level analysis across sequential PRs',
+            'Add chunked PR analysis with merge for PRs exceeding 50 files',
+            'Integrate GitHub Advisory Database / NVD direct query instead of pip-audit shell-out',
+            'Add entropy-based secret scanning to catch obfuscated structured secrets',
+        ],
     },
     {
         icon: <FileSearch size={28} />,
@@ -88,6 +105,18 @@ const projects = [
             'Delivers sub-300ms average local inference latency and supports concurrent batch ingestion with background file cleanup',
         ],
         github: 'https://github.com/purvanshh/DRISE-experiments',
+        limitations: [
+            'LayoutLMv3 base model — not fine-tuned on domain-specific document types, limiting specialized field extraction accuracy',
+            'PaddleOCR introduces language-specific dependencies; non-English documents may degrade OCR quality',
+            'Deterministic post-processing rules are hand-crafted per field type and do not generalise to arbitrary document schemas without reconfiguration',
+            'Memory-bound: rasterising multi-page PDFs at full resolution can exceed container memory limits on large documents',
+        ],
+        futureImprovements: [
+            'Fine-tune LayoutLMv3 on a diverse multi-domain document corpus to improve field-level F1',
+            'Replace PaddleOCR with a multilingual OCR backend for broader language support',
+            'Learn post-processing rules automatically from annotated schema examples instead of hand-crafted logic',
+            'Add streaming page rasterisation to handle large documents within fixed memory budgets',
+        ],
     },
     {
         icon: <GitBranch size={28} />,
@@ -113,6 +142,18 @@ const projects = [
             'Full UI: repo ingestion, QA, architecture dashboard with dependency hubs',
         ],
         github: 'https://github.com/purvanshh/github-rag',
+        limitations: [
+            'Graph expansion is limited to one hop of imports and callers/callees; deeper structural relationships are not explored',
+            'Cross-encoder reranking adds ~200ms latency per query, impacting interactive response times at scale',
+            'Chunking at symbol boundaries works well for functions and classes but breaks on top-level scripts and unstructured modules',
+            'No incremental indexing — full re-ingestion is required when the codebase changes',
+        ],
+        futureImprovements: [
+            'Extend graph expansion to multi-hop traversal with configurable depth limits to capture transitive dependencies',
+            'Replace cross-encoder reranking with binary passage re-ranking distillation for sub-50ms overhead',
+            'Add support for module-level natural language documentation chunking alongside symbol-level chunks',
+            'Implement incremental indexing via git diff change detection and selective re-embedding',
+        ],
     },
     {
         icon: <Landmark size={28} />,
@@ -138,6 +179,18 @@ const projects = [
             'Maintains a robust codebase verified by 187 zero-skip unit, integration, and chaos tests with 86% test coverage',
         ],
         github: 'https://github.com/purvanshh/AuditLend-Intelligence-Core--ALICe-',
+        limitations: [
+            'Trained on Lending Club data (2012–2015 US marketplace loans) — performance on contemporary or non-US credit populations is unvalidated',
+            'Mock external bureau, banking, and GST verification — real provider integration with variable latency and availability is untested',
+            'XGB_V1 is a single model; ensemble or multi-modal approaches may improve generalisation across underserved credit segments',
+            'SHAP explanations are post-hoc and model-specific; regulatory alignment requires further compliance audit validation',
+        ],
+        futureImprovements: [
+            'Train and evaluate on contemporary lending datasets with geographic and demographic diversity',
+            'Integrate live bureau, banking, and GST API providers with circuit breaker and retry orchestration',
+            'Explore lightGBM or NGBoost ensembles with conformal prediction intervals for calibrated uncertainty',
+            'Implement regulatory compliance suite with automated audit report generation aligned to local credit bureau standards',
+        ],
     },
 ];
 
