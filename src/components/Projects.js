@@ -1,5 +1,5 @@
 import React, { forwardRef, useState } from 'react';
-import { Shield, FileSearch, GitBranch, Landmark, ChevronDown, Github, Activity } from 'lucide-react';
+import { Shield, FileSearch, GitBranch, Landmark, ChevronDown, Github, Activity, CreditCard, Zap } from 'lucide-react';
 
 const projects = [
     {
@@ -157,39 +157,80 @@ const projects = [
     },
     {
         icon: <Landmark size={28} />,
-        name: 'ALICe',
+        name: 'AuditLend Intelligence Core (ALICe)',
         problem:
-            'Credit decisions must be explainable, auditable, and deterministic. Under degraded data conditions, typical systems fail silently or compute biased/unreliable risk scores.',
+            'Credit decisions must be explainable, auditable, and deterministic. Typical systems fail silently under degraded data, lack calibrated probability estimates, and produce no per-decision audit trail defensible in regulatory review.',
         approach: [
-            'Implements a transactional outbox pattern to atomically commit API application writes and Celery task intents to PostgreSQL, eliminating task loss',
-            'Worker claims tasks via atomic UPDATE queries and fetches mock external bureau, banking, and GST verification data with retry fetch reuse',
-            'Evaluates decisions using a calibrated XGB_V1 ML model (trained on 1.1M Lending Club rows) with isotonic regression and SHAP explainability',
+            'Implements a transactional outbox pattern to atomically commit API application writes and Celery task intents to PostgreSQL, eliminating silent task loss under network partition',
+            'Calibrated XGBoost model (XGB_V1) trained on 1.3M Lending Club loans with isotonic regression reduces ECE from 0.0162 to 0.0036 — per-decision SHAP values explain top-8 feature contributions',
+            'Full ML lifecycle: MLflow experiment tracking, file-backed model registry, KS-test drift detection, ONNX export, LRU+TTL prediction cache, A/B experimentation, causal inference via PSM, uplift modeling, and portfolio risk analytics',
+            'Dual scoring paths: deterministic RULE_SET_V1 heuristic and calibrated RULE_SET_V2 ML — system falls back gracefully when confidence degrades',
         ],
         failureFix:
-            'External service timeouts caused silent task loss. Implementing transactional outbox and circuit breakers with fallback logic guaranteed no applications are lost.',
+            'External service timeouts caused silent task loss: tasks were dispatched to Celery after the API committed to Postgres, so a crash mid-flight meant the application was persisted but never processed. Fix: transactional outbox — task intent is committed atomically with the application row, and a Redis-backed circuit breaker with half-open probe lock gates retries without cascading failures.',
         differentiators: [
-            'Immutable Audit Trail: PostgreSQL database triggers block UPDATE and DELETE queries on audit logs, securing compliance logs against tampering',
-            'Deterministic Heuristic Fallbacks: Instantly degrades to a governed RULE_SET_V1 scorecard when ML calibration confidence or provider data degrades',
-            'Chaos-tested Resilience: Redis-backed circuit breaker with half-open probe lock and mock APIs simulating timed out, stale, or partial data responses',
+            'Immutable Audit Trail: PostgreSQL triggers block UPDATE/DELETE on audit logs at the DB level — compliance evidence cannot be tampered with even by application code',
+            'Calibrated Probabilities: Isotonic regression reduced Expected Calibration Error by 78% (0.016 → 0.0036), making predicted default probabilities actionable across the full risk spectrum',
+            'SHAP + LLM Narratives: Every decision includes top-8 SHAP contributions and optional natural-language explanations via LLM integration, with policy RAG via ChromaDB for regulatory grounding',
+            'Proxy Fairness Audit: SPD and EOD measured across zip_code_prefix and employment_length_band groups at inference time alongside live drift detection',
         ],
-        tech: 'Python · FastAPI · Celery · PostgreSQL · Redis · XGBoost · SHAP · Docker · Prometheus',
+        tech: 'Python · FastAPI · Celery · PostgreSQL · Redis · XGBoost · SHAP · Isotonic Calibration · MLflow · ONNX · Evidently · Docker · Prometheus',
         results: [
-            'Achieves a verified 0.975 AUC-ROC and 0.025 Brier score for calibrated ML probability scoring on held-out test sets',
-            'Delivers +$68.3M simulated profit increase over baseline heuristics at a 0.50 calibrated default-probability threshold',
-            'Maintains a robust codebase verified by 187 zero-skip unit, integration, and chaos tests with 86% test coverage',
+            '0.9757 AUC-ROC and 0.0036 ECE on 49,230 held-out 2018 loans — 78% calibration improvement over uncalibrated model',
+            '+$68.3M simulated profit delta vs. heuristic baseline: ML reduced default rate from 15.1% to 2.3% while simultaneously increasing approval rate by 0.6pp',
+            '437+ zero-skip unit, integration, and chaos tests — full ML evaluation pipeline runnable end-to-end from raw Lending Club CSV',
         ],
         github: 'https://github.com/purvanshh/AuditLend-Intelligence-Core--ALICe-',
         limitations: [
-            'Trained on Lending Club data (2012–2015 US marketplace loans) — performance on contemporary or non-US credit populations is unvalidated',
-            'Mock external bureau, banking, and GST verification — real provider integration with variable latency and availability is untested',
-            'XGB_V1 is a single model; ensemble or multi-modal approaches may improve generalisation across underserved credit segments',
-            'SHAP explanations are post-hoc and model-specific; regulatory alignment requires further compliance audit validation',
+            'Trained on Lending Club (2007–2018 US marketplace loans) — performance on contemporary or non-US credit populations is unvalidated',
+            'Mock external bureau, banking, and GST verification — real provider integration with variable latency and partial-data responses is untested',
+            'XGB_V1 is a single model; ensemble approaches or conformal prediction intervals would improve uncertainty quantification for edge-case applicants',
+            'SHAP explanations are post-hoc and model-specific; full regulatory alignment requires a formal compliance audit beyond proxy fairness checks',
         ],
         futureImprovements: [
-            'Train and evaluate on contemporary lending datasets with geographic and demographic diversity',
-            'Integrate live bureau, banking, and GST API providers with circuit breaker and retry orchestration',
-            'Explore lightGBM or NGBoost ensembles with conformal prediction intervals for calibrated uncertainty',
-            'Implement regulatory compliance suite with automated audit report generation aligned to local credit bureau standards',
+            'Train and evaluate on contemporary lending datasets with geographic and demographic diversity beyond US marketplace loans',
+            'Integrate live bureau, banking, and GST API providers with circuit breaker and retry orchestration replacing deterministic mocks',
+            'Explore LightGBM or NGBoost ensembles with conformal prediction intervals for calibrated uncertainty on tail-risk applicants',
+            'Implement automated regulatory compliance reporting aligned to local credit bureau standards with evidence archiving',
+        ],
+    },
+    {
+        icon: <Zap size={28} />,
+        name: 'PayShield',
+        problem:
+            'UPI fraud detection requires sub-100ms scoring decisions, yet pure rule-based systems miss novel fraud patterns while pure ML systems are opaque black boxes without interpretable evidence chains for compliance and investigation.',
+        approach: [
+            'Three-layer scoring architecture: L1 statistical filter (velocity, geo-velocity, Benford\'s Law — 12 configurable YAML rules), L2 PyTorch Geometric heterogeneous GNN over Users/Merchants/Devices/Transactions graph, and L3 async LLM investigation via Ollama (llama3.1:8b) dispatched through Celery',
+            'Fusion engine applies weighted combination of L1 and L2 scores with isotonic calibration, feeding a decision gate that routes to ALLOW / BLOCK / REVIEW with WebSocket alert broadcast on BLOCK',
+            'Graph-powered investigation: Neo4j stores the fraud entity graph; risk paths, ego-networks, and entity links are queryable via dedicated routes; NetworkX serves as offline fallback',
+            '14-agent multi-agent framework handles reflection (FP clustering, drift detection, nightly weight sync), human-in-the-loop feedback, mitigation actions, decision critic, and validation — all coordinated by a collective agent swarm',
+        ],
+        failureFix:
+            'Early integration testing showed Neo4j entity lookups timing out under concurrent scoring load, causing the L2 GNN feature extraction to block synchronously on graph queries. Fix: extracted graph feature computation into a dedicated async path with Redis-backed feature store for hot entities, falling back to structural heuristics when Neo4j is unavailable — ensuring L1+L2 scoring stays under 50ms p50 even during graph DB degradation.',
+        differentiators: [
+            'Multi-layer evidence chain: every BLOCK decision includes L1 rule triggers, L2 GNN risk score, SHAP feature attributions, and GNNExplainer evidence subgraphs — audit-ready for PCI-DSS, RBI, and EU AI Act compliance',
+            'Reflection agent closes the feedback loop: nightly FP clustering identifies systematic false positive patterns and auto-tunes rule thresholds with statistical significance testing before promoting changes',
+            'Full regulatory compliance stack: PCI-DSS (10 controls), RBI data residency, EU AI Act risk management — plus OFAC/UN sanctions screening, AML velocity checks, and KYC tier verification built in',
+            'Production-grade ops: Kubernetes manifests with HPA, PDBs, and network policies; SRE SLOs with error budget tracking; 5 chaos experiments; disaster recovery runbooks for Postgres, Redis, and Neo4j',
+        ],
+        tech: 'Python · FastAPI · PyTorch Geometric · Neo4j · Celery · Redis · PostgreSQL · Ollama (llama3.1:8b) · SHAP · GNNExplainer · Vite · React · TypeScript · Kubernetes',
+        results: [
+            'p50 < 50ms for L1+L2 scoring path — LLM deep investigation runs asynchronously without blocking the scoring response',
+            'Heterogeneous GNN captures cross-entity fraud signals (shared devices, velocity rings, merchant collusion) invisible to per-transaction rule systems',
+            'Full compliance coverage: PCI-DSS, RBI localization, EU AI Act risk management, OFAC/UN sanctions, AML structuring detection, and KYC verification in a single integrated stack',
+        ],
+        github: 'https://github.com/purvanshh/PayShield',
+        limitations: [
+            'GNN model trained on synthetic UPI transaction data — real-world fraud pattern coverage and generalization to live production traffic is unvalidated',
+            'Ollama LLM investigation (llama3.1:8b) runs locally; investigation quality degrades on hardware without GPU acceleration and adds 2–10s async latency',
+            'Neo4j graph grows unbounded without a compaction/archival strategy — long-running deployments will require entity lifecycle management',
+            'Multi-agent framework coordination overhead is not yet benchmarked under high-concurrency load; collective agent swarm scaling limits are unknown',
+        ],
+        futureImprovements: [
+            'Fine-tune GNN on labeled real-world UPI transaction datasets to improve precision/recall on live fraud patterns beyond synthetic training data',
+            'Replace local Ollama with a managed inference endpoint for consistent investigation quality and sub-second LLM latency',
+            'Implement graph entity lifecycle management (archival, compaction) to keep Neo4j query performance bounded at scale',
+            'Extend A/B experimentation framework with automated champion/challenger promotion based on real-time precision/recall tracking',
         ],
     },
 ];

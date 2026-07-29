@@ -101,47 +101,95 @@ const systems = [
         ],
     },
     {
-        name: 'ALICe',
-        tagline: 'Auditable credit decision engine with ML scoring and fallback guardrails',
+        name: 'AuditLend Intelligence Core (ALICe)',
+        tagline: 'Calibrated XGBoost credit scorer · SHAP explainability · immutable audit trail · full ML lifecycle',
         github: 'https://github.com/purvanshh/AuditLend-Intelligence-Core--ALICe-',
+        hasCaseStudy: true,
         pipeline: [
-            { label: 'Loan Request', sub: 'POST /apply-loan' },
-            { label: 'Intake', sub: 'idempotency · encrypt · outbox' },
-            { label: 'External Data', sub: '3 providers in parallel', highlight: true },
-            { label: 'Decision Engine', sub: 'scoring · ML model · fallback' },
-            { label: 'Decision', sub: 'approve · decline · review' },
-            { label: 'Audit + Explain', sub: 'append-only trail' },
+            { label: 'Loan Request', sub: 'POST /apply-loan · idempotency key' },
+            { label: 'Intake', sub: 'encrypt PII · transactional outbox' },
+            { label: 'External Data', sub: 'bureau · bank · GST in parallel', highlight: true },
+            { label: 'ML Engine', sub: 'XGB_V1 + isotonic calibration + SHAP' },
+            { label: 'Decision Gate', sub: 'approve · decline · review · fallback' },
+            { label: 'Audit + Explain', sub: 'append-only trail · SHAP · LLM narrative' },
         ],
         supportSystems: {
-            security: ['AES-256-GCM encrypted PII', 'Salted SHA-256 PAN hash', 'API key auth (scoped)', 'Sanitized audit snapshots'],
-            reliability: ['Transactional outbox (atomic commit)', 'Circuit breaker with half-open probe lock', 'Retry/backoff per provider', 'External data fetch reuse on retry'],
-            data: ['PostgreSQL (applications, outbox, audit)', 'Redis (idempotency, broker, circuit state)', 'Alembic migrations'],
-            observability: ['Prometheus metrics (7 series)', 'Worker health endpoint (:8004)', 'Structured JSON logs'],
+            security: ['AES-256-GCM encrypted PII', 'Salted SHA-256 PAN hash', 'OAuth2/OIDC + API key auth', 'HashiCorp Vault PII key mgmt', 'HSTS · CSP · X-Frame-Options'],
+            reliability: ['Transactional outbox (atomic commit)', 'Circuit breaker with half-open probe lock', 'Retry/backoff per provider', 'ONNX export + LRU+TTL prediction cache', 'Graceful degradation to RULE_SET_V1'],
+            data: ['PostgreSQL (applications, outbox, audit)', 'Redis (idempotency, broker, circuit state)', 'ChromaDB (policy RAG)', 'MLflow model registry (optional)', 'Alembic migrations'],
+            observability: ['Prometheus metrics (7 series)', 'KS-test drift detection + Evidently dashboards', 'Grafana drift monitoring', 'Structured JSON logs', 'Immutable append-only audit trail'],
         },
         failurePath: {
-            trigger: 'External service failure or ML uncertainty degradation',
-            flow: ['Provider call fails or ML confidence falls below threshold', 'Retry with backoff → if still fails: apply conservative fallback', 'Data reliability/confidence fields are reduced', 'Calibrated confidence drops → fallback to RULE_SET_V1 / NEEDS_REVIEW', 'Low confidence routes to human manual review'],
-            outcome: 'Application is never lost. Fallback values reduce confidence, not correctness. Audit trail records exactly what happened.',
+            trigger: 'External service failure or ML confidence/drift degradation',
+            flow: ['Provider call fails or times out', 'Retry with backoff → conservative fallback data applied', 'Data reliability fields reduced; calibrated confidence drops', 'ML confidence below threshold → fallback to RULE_SET_V1 heuristic scorecard', 'Unresolvable uncertainty → NEEDS_REVIEW routed to manual human review'],
+            outcome: 'Application is never lost (transactional outbox). Fallback values reduce confidence, not correctness. Audit trail records exactly which path was taken.',
         },
         decisionLogic: {
-            title: 'How decisions are made',
+            title: 'How credit decisions are made',
             steps: [
-                { label: 'Heuristic Risk', detail: 'Weighted formula across credit, income, EMI burden, loan-to-income ratio' },
-                { label: 'ML Scoring (XGB_V1)', detail: 'Calibrated ML probability calibrated via Isotonic Regression, SHAP explains' },
-                { label: 'Data Reliability & Confidence', detail: 'Reduces score confidence if provider data is degraded or model is uncertain' },
-                { label: 'Decision Gate / Fallback', detail: 'GST mismatch blocks approval. Low confidence falls back to heuristics or manual review.' },
+                { label: 'Heuristic Scoring (RULE_SET_V1)', detail: 'Weighted formula: credit score, income, EMI burden, loan-to-income ratio' },
+                { label: 'ML Scoring (XGB_V1)', detail: 'XGBoost → Isotonic Regression calibration → P(default); ECE = 0.0036' },
+                { label: 'SHAP Explainability', detail: 'Top-8 feature contributions per prediction; optional LLM narrative via litellm' },
+                { label: 'Data Reliability Gate', detail: 'GST mismatch blocks. Low provider data quality reduces confidence. Drift triggers fallback.' },
             ],
         },
         decisions: [
-            { point: 'Why transactional outbox?', tradeoff: 'Network failure between API commit and Celery dispatch loses the task. Outbox commits task intent with the DB write — at-least-once guaranteed.' },
-            { point: 'Why heuristic fallback?', tradeoff: 'Under high drift or degraded data, ML scores become unreliable. Falling back to governed heuristics guarantees business continuity.' },
-            { point: 'Why audit-derived explanations?', tradeoff: 'Recomputing explanations could differ if code changed. Reading from the audit trail guarantees the explanation matches what actually happened.' },
+            { point: 'Why transactional outbox?', tradeoff: 'Network failure between API commit and Celery dispatch silently loses tasks. Outbox commits task intent atomically with the DB write — at-least-once processing guaranteed.' },
+            { point: 'Why isotonic calibration?', tradeoff: 'Raw XGBoost probabilities are poorly calibrated (ECE 0.016). Isotonic regression on the validation set reduced ECE to 0.0036 — making probability thresholds directly actionable for risk pricing.' },
+            { point: 'Why heuristic fallback?', tradeoff: 'Under high drift or degraded provider data, ML scores become unreliable. Deterministic RULE_SET_V1 guarantees business continuity and a defensible audit trail even without ML.' },
+            { point: 'Why audit-derived explanations?', tradeoff: 'Recomputing SHAP after the fact could differ if the model or code changed. Storing explanations in the audit trail guarantees the explanation matches what actually executed.' },
         ],
         metrics: [
-            { value: '187', label: 'Tests', detail: '0 skipped' },
-            { value: '86%', label: 'Coverage', detail: '85% gate' },
-            { value: 'XGB', label: 'Calibrated', detail: '0.975 AUC-ROC' },
-            { value: '+$68M', label: 'Sim Profit', detail: 'ML vs Heuristic' },
+            { value: '0.976', label: 'AUC-ROC', detail: 'calibrated, 49K held-out loans' },
+            { value: '0.0036', label: 'ECE', detail: '78% calibration improvement' },
+            { value: '+$68.3M', label: 'Sim Profit', detail: 'ML vs heuristic baseline' },
+            { value: '437+', label: 'Tests', detail: '0 skipped · full ML pipeline' },
+        ],
+    },
+    {
+        name: 'PayShield',
+        tagline: 'Multi-layer UPI fraud scoring · GNN graph intelligence · 14-agent orchestration · production-ready ops',
+        github: 'https://github.com/purvanshh/PayShield',
+        hasCaseStudy: true,
+        pipeline: [
+            { label: 'Transaction', sub: 'POST /v1/score · API key auth' },
+            { label: 'L1: Statistical', sub: 'velocity · geo · Benford (12 rules)' },
+            { label: 'Decision Gate', sub: 'BLOCK → WS alert · ESCALATE', highlight: true },
+            { label: 'L2: GNN', sub: 'PyTorch Geometric · hetero graph' },
+            { label: 'Fusion Engine', sub: 'weighted fusion + isotonic calib' },
+            { label: 'L3: LLM (async)', sub: 'Ollama · Celery · investigation report' },
+        ],
+        supportSystems: {
+            security: ['API key + JWT bearer auth (RBAC)', 'PCI-DSS 10 controls', 'OFAC/UN sanctions screening', 'AML velocity + structuring check', 'KYC tier verification', 'Security headers middleware'],
+            reliability: ['Redis circuit breaker + fallback cache', 'Celery async task queue (investigation)', 'NetworkX fallback graph DB (Neo4j offline)', 'Graceful degradation on Ollama unavailability', 'Kubernetes HPA + PDBs + network policies'],
+            data: ['PostgreSQL (users, audit, investigations, API keys)', 'Neo4j (fraud entity graph: users, merchants, devices)', 'Redis (cache, rate limit, Celery broker, feature store)', 'Vite + React TypeScript dashboard'],
+            observability: ['Prometheus metrics + Grafana dashboards', 'Structlog structured logging', 'Population Stability Index drift detection', 'SLO definitions + error budget tracking', '5 chaos experiments (api, neo4j, ollama, pg, redis)'],
+        },
+        failurePath: {
+            trigger: 'Neo4j graph DB latency spike blocking synchronous L2 GNN feature extraction',
+            flow: ['L2 GNN feature engine calls Neo4j for entity graph features', 'Query latency exceeds scoring SLA threshold', 'Redis feature store checked for cached entity features', 'If cache miss: structural heuristic features computed in-process', 'Scoring proceeds with degraded graph features; L1 statistical score still authoritative'],
+            outcome: 'L1+L2 scoring stays under 50ms p50. L3 LLM investigation runs async via Celery regardless — graph DB recovery is transparent to the scoring path.',
+        },
+        decisionLogic: {
+            title: 'How fraud scores are computed',
+            steps: [
+                { label: 'L1 Statistical Filter', detail: '12 configurable YAML rules: velocity (6), geo-velocity (4), Benford\'s Law (2)' },
+                { label: 'L2 GNN Inference', detail: 'Heterogeneous graph: User/Merchant/Device/Transaction nodes; edge features + message passing' },
+                { label: 'Ensemble Fusion', detail: 'Weighted L1 + L2 combination → Isotonic calibration → calibrated P(fraud)' },
+                { label: 'Decision Gate', detail: 'ALLOW / BLOCK / REVIEW threshold; BLOCK broadcasts WebSocket alert + queues LLM investigation' },
+            ],
+        },
+        decisions: [
+            { point: 'Why a heterogeneous GNN?', tradeoff: 'Per-transaction rules miss ring fraud (shared devices across accounts, velocity rings, merchant collusion). A graph over User/Merchant/Device/Transaction nodes captures cross-entity signals invisible to flat feature vectors.' },
+            { point: 'Why async L3 LLM investigation?', tradeoff: 'Ollama inference takes 2–10s — blocking the scoring path would violate the <100ms SLA. Celery decouples investigation from decision, so BLOCK is immediate while the report is generated in the background.' },
+            { point: 'Why 14 agents?', tradeoff: 'Monolithic scoring cannot self-correct. The reflection agent clusters false positives nightly and auto-tunes thresholds; the critic agent evaluates decision quality; human-review and mitigation agents handle edge cases — each concern is isolated and independently replaceable.' },
+            { point: 'Why PCI-DSS + RBI + EU AI Act in one stack?', tradeoff: 'UPI payments touch Indian (RBI) data residency rules, international card network (PCI-DSS) controls, and EU AI Act transparency requirements simultaneously. Building compliance in rather than bolting it on eliminates gaps at audit time.' },
+        ],
+        metrics: [
+            { value: '<50ms', label: 'p50 Latency', detail: 'L1+L2 scoring path' },
+            { value: '14', label: 'Agents', detail: 'reflection · critic · mitigation' },
+            { value: '3-layer', label: 'Compliance', detail: 'PCI-DSS · RBI · EU AI Act' },
+            { value: 'GNN+L1', label: 'Fusion Score', detail: 'isotonic calibrated P(fraud)' },
         ],
     },
 ];
@@ -675,6 +723,12 @@ const SystemDesign = forwardRef((props, ref) => {
 
             {selectedSystem === 'SentinelOps AI' && (
                 <SentinelOpsCaseStudyModal onClose={() => setSelectedSystem(null)} />
+            )}
+            {selectedSystem === 'AuditLend Intelligence Core (ALICe)' && (
+                <ALICeCaseStudyModal onClose={() => setSelectedSystem(null)} />
+            )}
+            {selectedSystem === 'PayShield' && (
+                <PayShieldCaseStudyModal onClose={() => setSelectedSystem(null)} />
             )}
         </section>
     );
