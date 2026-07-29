@@ -704,6 +704,304 @@ const SentinelOpsCaseStudyModal = ({ onClose }) => {
     );
 };
 
+/* ── ALICe Case Study Modal ── */
+const ALICeCaseStudyModal = ({ onClose }) => {
+    React.useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        return () => { document.body.style.overflow = ''; };
+    }, []);
+    return (
+        <div className="sd-modal-overlay" onClick={onClose}>
+            <div className="sd-modal-container" onClick={(e) => e.stopPropagation()}>
+                <div className="sd-modal-header">
+                    <div>
+                        <div className="sd-modal-title">AuditLend Intelligence Core (ALICe)</div>
+                        <div className="sd-modal-subtitle">System Design Case Study</div>
+                    </div>
+                    <button className="sd-modal-close-btn" onClick={onClose}>
+                        <X size={14} /> Close
+                    </button>
+                </div>
+                <div className="sd-modal-body">
+                    <div>
+                        <div className="sd-modal-section-title">Overview</div>
+                        <div className="sd-modal-text">
+                            ALICe is an audit-grade credit decision engine trained on 1.3M Lending Club loans (2007–2018). A calibrated XGBoost model with isotonic regression achieves 0.976 AUC-ROC and 0.0036 ECE, reducing default rates from 15.1% (heuristic) to 2.3% (ML) while simultaneously increasing approvals — delivering a $68.3M simulated profit delta on 49,230 held-out loans. Every decision includes SHAP explainability, an immutable audit trail, and graceful degradation to a deterministic heuristic scorecard when ML confidence degrades.
+                        </div>
+                    </div>
+                    <div>
+                        <div className="sd-modal-section-title">System Architecture</div>
+                        <div className="sd-modal-grid">
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title">FastAPI + Celery Worker</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>
+                                    POST /apply-loan commits the application and task intent atomically to PostgreSQL via transactional outbox. Celery worker claims tasks with atomic UPDATE queries, fetches bureau/bank/GST data in parallel, then runs the scoring engine.
+                                </div>
+                            </div>
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title">ML Scoring Engine</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>
+                                    XGB_V1 (max_depth=6, lr=0.05, 200 estimators) trained on 38 engineered features. Isotonic regression calibration on the 2017 validation set. ONNX export for optimized inference. LRU+TTL prediction cache in Redis. SHAP values computed per prediction with optional LLM narrative via litellm.
+                                </div>
+                            </div>
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title">ML Lifecycle & Governance</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>
+                                    MLflow experiment tracking, file-backed model registry, KS-test + Evidently drift detection, A/B experimentation framework, causal inference via propensity score matching, uplift modeling, survival analysis (Kaplan-Meier + CoxPH), and portfolio risk aggregation with CLI tooling.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div className="sd-modal-section-title">System Architecture Diagram</div>
+                        <div className="sd-diagram-container">
+                            <svg viewBox="0 0 800 340" className="sd-diagram-svg">
+                                <defs>
+                                    <marker id="arrowA" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                        <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#E7C38A" />
+                                    </marker>
+                                </defs>
+                                <rect x="20" y="20" width="140" height="55" rx="8" fill="rgba(19,22,27,0.8)" stroke="#E7C38A" strokeWidth="1.5"/>
+                                <text x="90" y="47" fill="#fff" fontSize="11" fontWeight="bold" textAnchor="middle">FastAPI</text>
+                                <text x="90" y="62" fill="#9CA3AF" fontSize="9" textAnchor="middle">POST /apply-loan</text>
+                                <rect x="200" y="20" width="140" height="55" rx="8" fill="rgba(19,22,27,0.8)" stroke="#E7C38A" strokeWidth="1.5" strokeDasharray="4 3"/>
+                                <text x="270" y="47" fill="#fff" fontSize="11" fontWeight="bold" textAnchor="middle">Transactional Outbox</text>
+                                <text x="270" y="62" fill="#9CA3AF" fontSize="9" textAnchor="middle">PostgreSQL atomic commit</text>
+                                <rect x="380" y="20" width="140" height="55" rx="8" fill="rgba(19,22,27,0.8)" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
+                                <text x="450" y="47" fill="#fff" fontSize="11" fontWeight="bold" textAnchor="middle">Celery Worker</text>
+                                <text x="450" y="62" fill="#9CA3AF" fontSize="9" textAnchor="middle">claim · fetch · score</text>
+                                <rect x="560" y="20" width="140" height="55" rx="8" fill="rgba(19,22,27,0.8)" stroke="#E7C38A" strokeWidth="2"/>
+                                <text x="630" y="47" fill="#fff" fontSize="11" fontWeight="bold" textAnchor="middle">XGB_V1 + Calibration</text>
+                                <text x="630" y="62" fill="#9CA3AF" fontSize="9" textAnchor="middle">Isotonic · SHAP · ONNX</text>
+                                <rect x="20" y="140" width="140" height="55" rx="8" fill="rgba(19,22,27,0.8)" stroke="rgba(255,255,255,0.12)" strokeWidth="1"/>
+                                <text x="90" y="165" fill="#fff" fontSize="11" textAnchor="middle">PostgreSQL</text>
+                                <text x="90" y="180" fill="#9CA3AF" fontSize="9" textAnchor="middle">apps · audit · outbox</text>
+                                <rect x="200" y="140" width="140" height="55" rx="8" fill="rgba(19,22,27,0.8)" stroke="rgba(255,255,255,0.12)" strokeWidth="1"/>
+                                <text x="270" y="165" fill="#fff" fontSize="11" textAnchor="middle">Redis</text>
+                                <text x="270" y="180" fill="#9CA3AF" fontSize="9" textAnchor="middle">cache · broker · circuit</text>
+                                <rect x="380" y="140" width="140" height="55" rx="8" fill="rgba(19,22,27,0.8)" stroke="rgba(255,255,255,0.12)" strokeWidth="1"/>
+                                <text x="450" y="165" fill="#fff" fontSize="11" textAnchor="middle">Mock Providers</text>
+                                <text x="450" y="180" fill="#9CA3AF" fontSize="9" textAnchor="middle">bureau · bank · GST</text>
+                                <rect x="560" y="140" width="140" height="55" rx="8" fill="rgba(19,22,27,0.8)" stroke="rgba(255,255,255,0.12)" strokeWidth="1"/>
+                                <text x="630" y="165" fill="#fff" fontSize="11" textAnchor="middle">MLflow + Registry</text>
+                                <text x="630" y="180" fill="#9CA3AF" fontSize="9" textAnchor="middle">tracking · drift · A/B</text>
+                                <rect x="200" y="260" width="340" height="55" rx="8" fill="rgba(19,22,27,0.8)" stroke="#E7C38A" strokeWidth="1.5"/>
+                                <text x="370" y="285" fill="#fff" fontSize="11" fontWeight="bold" textAnchor="middle">Decision Gate + Audit Trail</text>
+                                <text x="370" y="300" fill="#9CA3AF" fontSize="9" textAnchor="middle">approve · decline · review · immutable append-only log</text>
+                                <line x1="160" y1="47" x2="200" y2="47" stroke="#E7C38A" strokeWidth="1.2" markerEnd="url(#arrowA)"/>
+                                <line x1="340" y1="47" x2="380" y2="47" stroke="#E7C38A" strokeWidth="1.2" markerEnd="url(#arrowA)"/>
+                                <line x1="520" y1="47" x2="560" y2="47" stroke="#E7C38A" strokeWidth="1.2" markerEnd="url(#arrowA)"/>
+                                <line x1="450" y1="75" x2="450" y2="140" stroke="rgba(255,255,255,0.2)" strokeWidth="1" markerEnd="url(#arrowA)"/>
+                                <line x1="630" y1="75" x2="630" y2="140" stroke="rgba(255,255,255,0.2)" strokeWidth="1" markerEnd="url(#arrowA)"/>
+                                <path d="M 450 195 L 370 260" fill="none" stroke="#E7C38A" strokeWidth="1.2" markerEnd="url(#arrowA)"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div>
+                        <div className="sd-modal-section-title">Data Flow (Request Lifecycle)</div>
+                        <ul className="sd-modal-list">
+                            <li><strong>Intake:</strong> POST /apply-loan validates the idempotency key against Redis, encrypts PII with AES-256-GCM, and writes the application + outbox task intent atomically to PostgreSQL.</li>
+                            <li><strong>Worker Dispatch:</strong> Celery worker polls the outbox, claims the task with an atomic UPDATE, and fetches bureau, bank, and GST data in parallel with retry/backoff.</li>
+                            <li><strong>Scoring:</strong> XGB_V1 scores the 38-feature vector. Isotonic calibration maps raw scores to calibrated P(default). SHAP values identify top-8 feature contributions.</li>
+                            <li><strong>Decision Gate:</strong> GST mismatch hard-blocks. Low provider data quality reduces confidence. If calibrated confidence falls below threshold, system falls back to RULE_SET_V1 heuristic scorecard.</li>
+                            <li><strong>Audit:</strong> Decision, SHAP snapshot, confidence metadata, and data reliability flags are written append-only to the audit log. PostgreSQL triggers block any subsequent UPDATE/DELETE.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div className="sd-modal-section-title">ML Performance</div>
+                        <div className="sd-modal-grid">
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title">Calibration</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>Raw XGBoost ECE: 0.0162. After isotonic regression on 2017 validation set: 0.0036 — a 78% reduction. Brier score improved from 0.0266 to 0.0253. AUC-ROC held at 0.9757 post-calibration.</div>
+                            </div>
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title">Business Impact</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>Heuristic baseline: 85.14% approval, 15.06% default rate, −$9.4M simulated profit. ML model: 85.75% approval, 2.35% default rate, +$58.9M. Delta: +$68.3M profit, −12.7pp default rate, +0.6pp approvals.</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div className="sd-modal-section-title">Engineering Decisions</div>
+                        <div className="sd-modal-grid">
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title">Why transactional outbox?</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>A crash between the API commit and Celery dispatch silently loses the task. The outbox commits task intent atomically with the application row — the worker only processes tasks that are durably persisted, guaranteeing at-least-once delivery.</div>
+                            </div>
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title">Why isotonic calibration?</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>Raw XGBoost probabilities are systematically miscalibrated at the tails. Isotonic regression fit on the held-out 2017 validation set reduces ECE by 78%, making the output a true probability of default usable for risk pricing and threshold logic.</div>
+                            </div>
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title">Why audit-derived explanations?</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>Recomputing SHAP post-hoc could yield different values if the model or feature pipeline changed. Persisting SHAP values in the audit trail at decision time guarantees the explanation exactly matches what executed — a regulatory requirement, not just a nice-to-have.</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div className="sd-modal-section-title">Technologies & Tools</div>
+                        <table className="sd-modal-tech-table">
+                            <tbody>
+                                <tr><td className="sd-modal-tech-label">API & Worker</td><td>Python · FastAPI · Celery · Redis · Uvicorn</td></tr>
+                                <tr><td className="sd-modal-tech-label">ML & Calibration</td><td>XGBoost · Isotonic Regression · SHAP · scikit-learn · ONNX · onnxruntime</td></tr>
+                                <tr><td className="sd-modal-tech-label">ML Lifecycle</td><td>MLflow · Evidently · KS-test drift · A/B framework · Uplift XGB · survival models</td></tr>
+                                <tr><td className="sd-modal-tech-label">Databases</td><td>PostgreSQL · Redis · ChromaDB (policy RAG) · SQLAlchemy · Alembic</td></tr>
+                                <tr><td className="sd-modal-tech-label">Security</td><td>AES-256-GCM · OAuth2/OIDC · HashiCorp Vault · Rate limiting · Security headers</td></tr>
+                                <tr><td className="sd-modal-tech-label">Observability</td><td>Prometheus · Grafana · Structured JSON logs · Immutable audit trail</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+/* ── PayShield Case Study Modal ── */
+const PayShieldCaseStudyModal = ({ onClose }) => {
+    React.useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        return () => { document.body.style.overflow = ''; };
+    }, []);
+    return (
+        <div className="sd-modal-overlay" onClick={onClose}>
+            <div className="sd-modal-container" onClick={(e) => e.stopPropagation()}>
+                <div className="sd-modal-header">
+                    <div>
+                        <div className="sd-modal-title">PayShield</div>
+                        <div className="sd-modal-subtitle">System Design Case Study</div>
+                    </div>
+                    <button className="sd-modal-close-btn" onClick={onClose}>
+                        <X size={14} /> Close
+                    </button>
+                </div>
+                <div className="sd-modal-body">
+                    <div>
+                        <div className="sd-modal-section-title">Overview</div>
+                        <div className="sd-modal-text">
+                            PayShield is a real-time UPI fraud detection engine combining a 3-layer scoring architecture with a 14-agent orchestration framework. L1 statistical rules (velocity, geo-velocity, Benford's Law) gate 12 configurable checks in under 5ms. L2 PyTorch Geometric GNN scores the heterogeneous fraud graph (Users, Merchants, Devices, Transactions). L3 Ollama LLM investigation runs asynchronously via Celery — keeping p50 scoring latency under 50ms while generating full evidence narratives in the background.
+                        </div>
+                    </div>
+                    <div>
+                        <div className="sd-modal-section-title">System Architecture</div>
+                        <div className="sd-modal-grid">
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title">3-Layer Scoring Pipeline</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>
+                                    L1 statistical filter applies 12 YAML-configurable rules (6 velocity, 4 geo, 2 Benford). Passing transactions go to L2 GNN inference over the Neo4j fraud graph. Fusion engine combines both scores with isotonic calibration into a final P(fraud). BLOCK triggers a WebSocket alert immediately.
+                                </div>
+                            </div>
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title">Heterogeneous GNN</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>
+                                    PyTorch Geometric models four node types (User, Merchant, Device, Transaction) with typed edges. Captures ring fraud patterns — shared device fingerprints, velocity rings, merchant collusion — that are invisible to per-transaction rule systems. GNNExplainer + SHAP bridge produces evidence subgraphs per decision.
+                                </div>
+                            </div>
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title">14-Agent Framework</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>
+                                    Reflection agent clusters FPs nightly and auto-tunes thresholds. Critic agent evaluates decision quality. Human-review agent ingests analyst feedback. Mitigation agent executes automated responses. Collective agent coordinates swarm. Validation, planner, profile, transaction, memory, and monitoring agents handle the full lifecycle.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div className="sd-modal-section-title">Architecture Diagram</div>
+                        <div className="sd-diagram-container">
+                            <svg viewBox="0 0 800 320" className="sd-diagram-svg">
+                                <defs>
+                                    <marker id="arrowP" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                        <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#E7C38A" />
+                                    </marker>
+                                </defs>
+                                <rect x="20" y="30" width="120" height="50" rx="6" fill="rgba(19,22,27,0.8)" stroke="#E7C38A" strokeWidth="1.5"/>
+                                <text x="80" y="54" fill="#fff" fontSize="10" fontWeight="bold" textAnchor="middle">POST /v1/score</text>
+                                <text x="80" y="68" fill="#9CA3AF" fontSize="8" textAnchor="middle">API Key + RBAC</text>
+                                <rect x="175" y="30" width="130" height="50" rx="6" fill="rgba(19,22,27,0.8)" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
+                                <text x="240" y="54" fill="#fff" fontSize="10" fontWeight="bold" textAnchor="middle">L1: Statistical</text>
+                                <text x="240" y="68" fill="#9CA3AF" fontSize="8" textAnchor="middle">velocity · geo · Benford</text>
+                                <rect x="340" y="30" width="120" height="50" rx="6" fill="rgba(19,22,27,0.8)" stroke="#E7C38A" strokeWidth="1.5"/>
+                                <text x="400" y="50" fill="#E7C38A" fontSize="10" fontWeight="bold" textAnchor="middle">Decision Gate</text>
+                                <text x="400" y="64" fill="#9CA3AF" fontSize="8" textAnchor="middle">BLOCK / ESCALATE</text>
+                                <text x="400" y="75" fill="#9CA3AF" fontSize="7" textAnchor="middle">WS alert on BLOCK</text>
+                                <rect x="495" y="30" width="130" height="50" rx="6" fill="rgba(19,22,27,0.8)" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
+                                <text x="560" y="54" fill="#fff" fontSize="10" fontWeight="bold" textAnchor="middle">L2: GNN</text>
+                                <text x="560" y="68" fill="#9CA3AF" fontSize="8" textAnchor="middle">PyTorch Geometric</text>
+                                <rect x="660" y="30" width="120" height="50" rx="6" fill="rgba(19,22,27,0.8)" stroke="#E7C38A" strokeWidth="1.5"/>
+                                <text x="720" y="54" fill="#fff" fontSize="10" fontWeight="bold" textAnchor="middle">Fusion + Calib</text>
+                                <text x="720" y="68" fill="#9CA3AF" fontSize="8" textAnchor="middle">isotonic P(fraud)</text>
+                                <rect x="340" y="150" width="320" height="50" rx="6" fill="rgba(19,22,27,0.8)" stroke="rgba(255,255,255,0.1)" strokeWidth="1"/>
+                                <text x="500" y="173" fill="#fff" fontSize="10" fontWeight="bold" textAnchor="middle">L3: Ollama LLM Investigation (async)</text>
+                                <text x="500" y="187" fill="#9CA3AF" fontSize="8" textAnchor="middle">llama3.1:8b · Celery · evidence · SHAP · graph context</text>
+                                <rect x="20" y="150" width="280" height="50" rx="6" fill="rgba(19,22,27,0.8)" stroke="rgba(255,255,255,0.1)" strokeWidth="1"/>
+                                <text x="160" y="173" fill="#fff" fontSize="10" fontWeight="bold" textAnchor="middle">14-Agent Framework</text>
+                                <text x="160" y="187" fill="#9CA3AF" fontSize="8" textAnchor="middle">reflection · critic · human-review · mitigation</text>
+                                <rect x="20" y="265" width="200" height="45" rx="6" fill="rgba(19,22,27,0.8)" stroke="rgba(255,255,255,0.1)" strokeWidth="1"/>
+                                <text x="120" y="286" fill="#fff" fontSize="10" textAnchor="middle">Neo4j Fraud Graph</text>
+                                <text x="120" y="300" fill="#9CA3AF" fontSize="8" textAnchor="middle">User · Merchant · Device · Txn</text>
+                                <rect x="250" y="265" width="160" height="45" rx="6" fill="rgba(19,22,27,0.8)" stroke="rgba(255,255,255,0.1)" strokeWidth="1"/>
+                                <text x="330" y="286" fill="#fff" fontSize="10" textAnchor="middle">PostgreSQL</text>
+                                <text x="330" y="300" fill="#9CA3AF" fontSize="8" textAnchor="middle">audit · investigations</text>
+                                <rect x="440" y="265" width="160" height="45" rx="6" fill="rgba(19,22,27,0.8)" stroke="rgba(255,255,255,0.1)" strokeWidth="1"/>
+                                <text x="520" y="286" fill="#fff" fontSize="10" textAnchor="middle">Redis</text>
+                                <text x="520" y="300" fill="#9CA3AF" fontSize="8" textAnchor="middle">cache · broker · feature store</text>
+                                <rect x="630" y="265" width="150" height="45" rx="6" fill="rgba(19,22,27,0.8)" stroke="rgba(255,255,255,0.1)" strokeWidth="1"/>
+                                <text x="705" y="286" fill="#fff" fontSize="10" textAnchor="middle">Compliance Stack</text>
+                                <text x="705" y="300" fill="#9CA3AF" fontSize="8" textAnchor="middle">PCI-DSS · RBI · EU AI Act</text>
+                                <line x1="140" y1="55" x2="175" y2="55" stroke="#E7C38A" strokeWidth="1.2" markerEnd="url(#arrowP)"/>
+                                <line x1="305" y1="55" x2="340" y2="55" stroke="#E7C38A" strokeWidth="1.2" markerEnd="url(#arrowP)"/>
+                                <line x1="460" y1="55" x2="495" y2="55" stroke="#E7C38A" strokeWidth="1.2" markerEnd="url(#arrowP)"/>
+                                <line x1="625" y1="55" x2="660" y2="55" stroke="#E7C38A" strokeWidth="1.2" markerEnd="url(#arrowP)"/>
+                                <path d="M 720 80 L 500 150" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1" markerEnd="url(#arrowP)"/>
+                                <line x1="160" y1="200" x2="160" y2="265" stroke="rgba(255,255,255,0.15)" strokeWidth="1" markerEnd="url(#arrowP)"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div>
+                        <div className="sd-modal-section-title">Data Flow (Scoring Lifecycle)</div>
+                        <ul className="sd-modal-list">
+                            <li><strong>Intake:</strong> POST /v1/score validates the API key, enforces rate limits, and passes the transaction to the statistical filter.</li>
+                            <li><strong>L1 Filter:</strong> 12 YAML-configurable rules run synchronously. A BLOCK here triggers a WebSocket alert immediately and queues an LLM investigation via Celery — response returns in under 5ms.</li>
+                            <li><strong>L2 GNN:</strong> Passing transactions are enriched with entity features from the Redis feature store (or Neo4j for non-cached entities) and scored by the heterogeneous GNN.</li>
+                            <li><strong>Fusion:</strong> Weighted L1 + L2 scores are combined and passed through isotonic calibration to produce a final P(fraud). Decision gate applies environment-specific thresholds (dev/prod YAML).</li>
+                            <li><strong>Async Investigation:</strong> BLOCK and REVIEW decisions queue an Ollama LLM investigation task. The Celery worker collects evidence (L1 triggers, L2 features, SHAP values, graph context) and generates a structured investigation report stored in PostgreSQL.</li>
+                            <li><strong>Feedback Loop:</strong> Analyst feedback via the human-review agent feeds the reflection agent's nightly FP clustering. Statistically significant threshold adjustments are promoted via the A/B experimentation framework.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div className="sd-modal-section-title">Engineering Decisions</div>
+                        <div className="sd-modal-grid">
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title">Why a heterogeneous GNN?</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>Per-transaction rules miss ring fraud: shared device fingerprints across accounts, velocity rings, and merchant collusion patterns require reasoning across multiple entity types simultaneously. A graph over User/Merchant/Device/Transaction nodes captures these cross-entity signals in a single forward pass.</div>
+                            </div>
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title">Why async L3 LLM?</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>Ollama inference takes 2–10s. Blocking the scoring path would violate the sub-100ms SLA on every BLOCK decision. Celery decouples investigation from decision — BLOCK is immediate, the narrative report is generated in the background and retrievable via GET /v1/investigation/{'{'}txn_id{'}'} .</div>
+                            </div>
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title">Why 14 agents?</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>A monolithic scorer cannot self-correct. The reflection agent clusters false positives nightly and auto-tunes rule thresholds. The critic agent evaluates decision quality independently. Human-review and mitigation agents handle edge cases. Each concern is isolated, testable, and independently replaceable.</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div className="sd-modal-section-title">Technologies & Tools</div>
+                        <table className="sd-modal-tech-table">
+                            <tbody>
+                                <tr><td className="sd-modal-tech-label">API & Worker</td><td>Python · FastAPI · Celery · Redis · Uvicorn</td></tr>
+                                <tr><td className="sd-modal-tech-label">ML & Graph</td><td>PyTorch Geometric · SHAP · GNNExplainer · scikit-learn · Isotonic Calibration</td></tr>
+                                <tr><td className="sd-modal-tech-label">LLM</td><td>Ollama (llama3.1:8b) · Async Celery worker · structlog</td></tr>
+                                <tr><td className="sd-modal-tech-label">Databases</td><td>PostgreSQL · Neo4j · Redis · SQLAlchemy · Alembic</td></tr>
+                                <tr><td className="sd-modal-tech-label">Compliance</td><td>PCI-DSS · RBI localization · EU AI Act · OFAC/UN sanctions · AML · KYC</td></tr>
+                                <tr><td className="sd-modal-tech-label">Frontend & Ops</td><td>Vite · React · TypeScript · Kubernetes · Prometheus · Grafana · ArgoCD</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
 /* ── Main SystemDesign Component ── */
 const SystemDesign = forwardRef((props, ref) => {
     const [selectedSystem, setSelectedSystem] = useState(null);

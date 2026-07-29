@@ -1,5 +1,5 @@
 import React, { forwardRef, useState } from 'react';
-import { Shield, FileSearch, GitBranch, Landmark, ChevronDown, Github, Activity, CreditCard, Zap } from 'lucide-react';
+import { Shield, FileSearch, GitBranch, Landmark, ChevronDown, Github, Activity, Zap } from 'lucide-react';
 
 const projects = [
     {
