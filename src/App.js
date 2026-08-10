@@ -14,6 +14,7 @@ import {
 } from './components';
 import TabNav from './components/TabNav';
 import HamburgerMenuOverlay from './components/ui/HamburgerMenuOverlay';
+import { smoothScrollToTop } from './lib/smoothScroll';
 import { Home, FolderGit2, Layers, Wrench, Mail } from 'lucide-react';
 
 // Navigation menu items
@@ -30,7 +31,7 @@ function App() {
 
   const selectTab = useCallback((id) => {
     setActiveTab(id);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    smoothScrollToTop(700);
   }, []);
 
   const mobileItems = menuItems.map((item) => ({

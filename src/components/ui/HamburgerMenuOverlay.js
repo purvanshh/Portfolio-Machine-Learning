@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { cn } from "../../lib/utils";
+import { smoothScrollToTop } from "../../lib/smoothScroll";
 
 const HamburgerMenuOverlay = ({
     items = [],
@@ -52,7 +53,7 @@ const HamburgerMenuOverlay = ({
             if (item.href.startsWith('#')) {
                 const targetId = item.href.slice(1);
                 if (targetId === 'top') {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    smoothScrollToTop(600);
                 } else {
                     const element = document.getElementById(targetId);
                     if (element) {
