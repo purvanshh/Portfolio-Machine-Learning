@@ -8,7 +8,7 @@ function Footer() {
 
     return (
         <footer className="footer">
-            <p className="footer-text">© 2025 Purvansh Sahu · Built in React · Deployed on Vercel</p>
+            <p className="footer-text">© 2026 Purvansh Sahu · Built in React · Deployed on Vercel</p>
             <div className="footer-links">
                 <a href="#top" onClick={handleBackToTop}>↑ Back to top</a>
             </div>

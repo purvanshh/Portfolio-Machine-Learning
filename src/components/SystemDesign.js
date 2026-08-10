@@ -1,4 +1,4 @@
-import React, { forwardRef, useState } from 'react';
+import React, { useState } from 'react';
 import { Github, X } from 'lucide-react';
 
 const systems = [
@@ -284,32 +284,35 @@ const ImpactStrip = ({ metrics }) => (
 );
 
 /* ── Main Card ── */
-const SystemCard = ({ system, onViewCaseStudy }) => (
-    <div className="sd-card">
+const SystemCard = ({ system, onViewCaseStudy }) => {
+    const [expanded, setExpanded] = useState(false);
+
+    return (
+    <div className={`sd-card ${expanded ? 'expanded' : ''}`}>
         <div className="sd-card-header">
             <div>
                 <div className="sd-card-name">{system.name}</div>
                 <div className="sd-card-tagline">{system.tagline}</div>
             </div>
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <div className="sd-card-actions">
                 <a href={system.github} target="_blank" rel="noopener noreferrer" className="project-link" aria-label={`GitHub repository for ${system.name} system design`}>
                     <Github size={14} /> GitHub
                 </a>
                 {system.hasCaseStudy && (
                     <button
                         onClick={onViewCaseStudy}
-                        className="project-link"
-                        style={{
-                            background: 'rgba(231, 195, 138, 0.05)',
-                            border: '1px solid rgba(231, 195, 138, 0.25)',
-                            cursor: 'pointer',
-                            fontFamily: 'inherit',
-                            fontWeight: 'inherit',
-                        }}
+                        className="project-link sd-case-btn"
                     >
                         Case Study
                     </button>
                 )}
+                <button
+                    onClick={() => setExpanded(!expanded)}
+                    className="project-link sd-expand-btn"
+                    aria-expanded={expanded}
+                >
+                    {expanded ? 'Hide Details' : 'Details'}
+                </button>
             </div>
         </div>
 
@@ -320,6 +323,11 @@ const SystemCard = ({ system, onViewCaseStudy }) => (
                 <PipelineFlow steps={system.pipeline} />
             </div>
 
+            {/* 6. Impact (always visible) */}
+            <ImpactStrip metrics={system.metrics} />
+
+            {expanded && (
+                <div className="sd-details">
             {/* 2. Failure Path */}
             <div className="sd-section">
                 <div className="sd-section-label sd-section-label--warn">Failure Path</div>
@@ -343,12 +351,12 @@ const SystemCard = ({ system, onViewCaseStudy }) => (
                 <div className="sd-section-label">Why This Design</div>
                 <Decisions items={system.decisions} />
             </div>
-
-            {/* 6. Impact */}
-            <ImpactStrip metrics={system.metrics} />
+                </div>
+            )}
         </div>
     </div>
-);
+    );
+};
 
 /* ── Case Study Modal Sub-component ── */
 const SentinelOpsCaseStudyModal = ({ onClose }) => {
@@ -1003,13 +1011,13 @@ const PayShieldCaseStudyModal = ({ onClose }) => {
     );
 };
 /* ── Main SystemDesign Component ── */
-const SystemDesign = forwardRef((props, ref) => {
+const SystemDesign = () => {
     const [selectedSystem, setSelectedSystem] = useState(null);
 
     return (
-        <section className="section" id="system-design" ref={ref}>
-            <h2 className="section-heading">System Design</h2>
-            <div className="section-content">
+        <section className="panel" id="system-design">
+            <h2 className="panel-heading">System Design</h2>
+            <div className="panel-content">
                 {systems.map((s) => (
                     <SystemCard
                         key={s.name}
@@ -1030,6 +1038,6 @@ const SystemDesign = forwardRef((props, ref) => {
             )}
         </section>
     );
-});
+};
 
 export default SystemDesign;

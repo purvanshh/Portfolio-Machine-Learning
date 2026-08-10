@@ -1,4 +1,4 @@
-import React, { forwardRef, useState } from 'react';
+import React, { useState } from 'react';
 import { Shield, FileSearch, GitBranch, Landmark, ChevronDown, Github, Activity, Zap } from 'lucide-react';
 
 const projects = [
@@ -339,17 +339,17 @@ const ProjectCard = ({ project }) => {
     );
 };
 
-const Projects = forwardRef((props, ref) => {
+const Projects = () => {
     return (
-        <section className="section" id="projects" ref={ref}>
-            <h2 className="section-heading">Projects</h2>
-            <div className="section-content">
+        <section className="panel" id="projects">
+            <h2 className="panel-heading">Projects</h2>
+            <div className="panel-content">
                 {projects.map((project) => (
                     <ProjectCard key={project.name} project={project} />
                 ))}
             </div>
         </section>
     );
-});
+};
 
 export default Projects;

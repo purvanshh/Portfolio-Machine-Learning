@@ -1,11 +1,11 @@
-import React, { forwardRef } from 'react';
+import React from 'react';
 
-const Education = forwardRef((props, ref) => {
+const Education = () => {
     return (
-        <section className="section" id="education" ref={ref}>
-            <h2 className="section-heading">Education</h2>
-            <div className="section-content">
-                <div className="entry">
+        <section className="panel" id="education">
+            <h2 className="panel-heading">Education</h2>
+            <div className="panel-content">
+                <div className="content-card">
                     <div className="entry-header">
                         <span className="entry-title">B.Sc. Computer Science - BITS Pilani</span>
                         <span className="badge">Current</span>
@@ -19,6 +19,6 @@ const Education = forwardRef((props, ref) => {
             </div>
         </section>
     );
-});
+};
 
 export default Education;

@@ -1,40 +1,72 @@
-import React, { forwardRef } from 'react';
+import React from 'react';
 
-const Proficiencies = forwardRef((props, ref) => {
+const proficiencyGroups = [
+    {
+        title: 'ML / Modeling',
+        items: [
+            'Supervised classification',
+            'Token classification',
+            'Sequence labeling',
+            'Multimodal models (LayoutLMv3)',
+            'Transformer architectures',
+            'RAG pipelines',
+            'LLM prompt engineering',
+            'Ablation studies',
+            'Precision / recall evaluation',
+            'Confidence calibration',
+        ],
+    },
+    {
+        title: 'Systems / Backend',
+        items: [
+            'Async task pipelines (Celery + Redis)',
+            'Transactional outbox',
+            'Idempotent APIs',
+            'Circuit breakers',
+            'Multi-agent orchestration',
+            'Confidence arbitration',
+            'PostgreSQL',
+            'SQLAlchemy',
+            'Database-level constraints',
+        ],
+    },
+    {
+        title: 'Tools / Infra',
+        items: [
+            'Python',
+            'PyTorch',
+            'FastAPI',
+            'Docker',
+            'GitHub Actions CI/CD',
+            'ChromaDB',
+            'tree-sitter',
+            'NetworkX',
+            'Prometheus',
+            'Structured logging',
+        ],
+    },
+];
+
+const Proficiencies = () => {
     return (
-        <section className="section" id="proficiencies" ref={ref}>
-            <h2 className="section-heading">Proficiencies</h2>
-            <div className="section-content">
-                <div className="proficiency-group">
-                    <div className="proficiency-title">ML / Modeling</div>
-                    <div className="proficiency-items">
-                        <span>Supervised classification, token classification, sequence labeling</span>
-                        <span>Multimodal models (LayoutLMv3), transformer architectures</span>
-                        <span>RAG pipelines, LLM prompt engineering</span>
-                        <span>Evaluation: ablation studies, precision/recall, confidence calibration</span>
-                    </div>
-                </div>
-                <div className="proficiency-group">
-                    <div className="proficiency-title">Systems / Backend</div>
-                    <div className="proficiency-items">
-                        <span>Async task pipelines (Celery + Redis)</span>
-                        <span>Transactional outbox, idempotent APIs, circuit breakers</span>
-                        <span>Multi-agent orchestration, confidence arbitration</span>
-                        <span>PostgreSQL, SQLAlchemy, database-level constraints</span>
-                    </div>
-                </div>
-                <div className="proficiency-group">
-                    <div className="proficiency-title">Tools / Infra</div>
-                    <div className="proficiency-items">
-                        <span>Python, PyTorch, FastAPI</span>
-                        <span>Docker, GitHub Actions CI/CD</span>
-                        <span>ChromaDB, tree-sitter, NetworkX</span>
-                        <span>Prometheus, structured logging</span>
-                    </div>
+        <section className="panel" id="proficiencies">
+            <h2 className="panel-heading">Proficiencies</h2>
+            <div className="panel-content">
+                <div className="proficiency-grid">
+                    {proficiencyGroups.map((group) => (
+                        <div key={group.title} className="content-card proficiency-card">
+                            <div className="proficiency-title">{group.title}</div>
+                            <div className="skill-tags">
+                                {group.items.map((item, i) => (
+                                    <span key={i} className="skill-tag">{item}</span>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
         </section>
     );
-});
+};
 
 export default Proficiencies;
