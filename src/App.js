@@ -1,9 +1,6 @@
-import { useRef, useLayoutEffect } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useState, useCallback } from 'react';
 import './App.css';
 import {
-  Header,
   Hero,
   EngineeringThesis,
   Experience,
@@ -15,87 +12,84 @@ import {
   Footer,
   ShaderAnimation,
 } from './components';
+import TabNav from './components/TabNav';
 import HamburgerMenuOverlay from './components/ui/HamburgerMenuOverlay';
-import { Home, Crosshair, Briefcase, FolderGit2, Layers, Wrench, GraduationCap, Mail } from 'lucide-react';
-
-// Register ScrollTrigger plugin
-gsap.registerPlugin(ScrollTrigger);
+import { Home, FolderGit2, Layers, Wrench, Mail } from 'lucide-react';
 
 // Navigation menu items
 const menuItems = [
-  { label: 'Home', icon: <Home size={24} />, href: '#top' },
-  { label: 'Thesis', icon: <Crosshair size={24} />, href: '#thesis' },
-  { label: 'Experience', icon: <Briefcase size={24} />, href: '#experience' },
-  { label: 'Projects', icon: <FolderGit2 size={24} />, href: '#projects' },
-  { label: 'Proficiencies', icon: <Wrench size={24} />, href: '#proficiencies' },
-  { label: 'Education', icon: <GraduationCap size={24} />, href: '#education' },
-  { label: 'System Design', icon: <Layers size={24} />, href: '#system-design' },
-  { label: 'Contact', icon: <Mail size={24} />, href: '#contact' },
+  { label: 'About', icon: <Home size={24} />, id: 'about' },
+  { label: 'Projects', icon: <FolderGit2 size={24} />, id: 'projects' },
+  { label: 'System Design', icon: <Layers size={24} />, id: 'system-design' },
+  { label: 'Proficiencies', icon: <Wrench size={24} />, id: 'proficiencies' },
+  { label: 'Contact', icon: <Mail size={24} />, id: 'contact' },
 ];
 
 function App() {
-  const sectionsRef = useRef([]);
+  const [activeTab, setActiveTab] = useState('about');
 
-  // Smooth scroll-linked heading animation with GSAP ScrollTrigger
-  useLayoutEffect(() => {
-    // Small delay to ensure refs are populated
-    const ctx = gsap.context(() => {
-      sectionsRef.current.forEach(section => {
-        if (!section) return;
-        const heading = section.querySelector('.section-heading');
-        if (!heading) return;
-
-        // Create smooth scrub animation for each heading
-        gsap.to(heading, {
-          y: 60,
-          ease: 'none',
-          scrollTrigger: {
-            trigger: section,
-            start: 'top 80%',
-            end: 'bottom 20%',
-            scrub: 0.8, // Smooth scrubbing with 0.8s lag for buttery feel
-          },
-        });
-      });
-    });
-
-    return () => ctx.revert(); // Cleanup
+  const selectTab = useCallback((id) => {
+    setActiveTab(id);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  const addSectionRef = (el) => {
-    if (el && !sectionsRef.current.includes(el)) {
-      sectionsRef.current.push(el);
-    }
-  };
+  const mobileItems = menuItems.map((item) => ({
+    ...item,
+    onClick: () => selectTab(item.id),
+  }));
 
   return (
     <>
       <div className="shader-fullscreen-bg">
         <ShaderAnimation />
       </div>
-      <HamburgerMenuOverlay
-        items={menuItems}
-        buttonTop="50px"
-        buttonLeft="calc(100% - 50px)"
-        buttonSize="md"
-        buttonColor="rgba(20, 20, 35, 0.9)"
-        overlayBackground="linear-gradient(135deg, rgba(10, 10, 20, 0.98) 0%, rgba(20, 20, 40, 0.98) 50%, rgba(10, 10, 25, 0.98) 100%)"
-        textColor="#ffffff"
-        fontSize="lg"
-        enableBlur={true}
-        animationDuration={0.8}
-        staggerDelay={0.06}
-      />
+      <TabNav activeTab={activeTab} onSelect={selectTab} />
+      <div className="mobile-menu-wrap">
+        <HamburgerMenuOverlay
+          items={mobileItems}
+          buttonTop="50px"
+          buttonLeft="calc(100% - 50px)"
+          buttonSize="md"
+          buttonColor="rgba(20, 20, 35, 0.9)"
+          overlayBackground="linear-gradient(135deg, rgba(10, 10, 20, 0.98) 0%, rgba(20, 20, 40, 0.98) 50%, rgba(10, 10, 25, 0.98) 100%)"
+          textColor="#ffffff"
+          fontSize="lg"
+          enableBlur={true}
+          animationDuration={0.8}
+          staggerDelay={0.06}
+        />
+      </div>
       <div className="portfolio">
-        <Header />
-        <Hero />
-        <EngineeringThesis ref={addSectionRef} />
-        <Experience ref={addSectionRef} />
-        <Projects ref={addSectionRef} />
-        <Proficiencies ref={addSectionRef} />
-        <Education ref={addSectionRef} />
-        <SystemDesign ref={addSectionRef} />
-        <Contact ref={addSectionRef} />
+        <main className="tab-panels">
+          {activeTab === 'about' && (
+            <div className="tab-panel">
+              <Hero />
+              <EngineeringThesis />
+              <Experience />
+              <Education />
+            </div>
+          )}
+          {activeTab === 'projects' && (
+            <div className="tab-panel">
+              <Projects />
+            </div>
+          )}
+          {activeTab === 'system-design' && (
+            <div className="tab-panel">
+              <SystemDesign />
+            </div>
+          )}
+          {activeTab === 'proficiencies' && (
+            <div className="tab-panel">
+              <Proficiencies />
+            </div>
+          )}
+          {activeTab === 'contact' && (
+            <div className="tab-panel">
+              <Contact />
+            </div>
+          )}
+        </main>
         <Footer />
       </div>
     </>
