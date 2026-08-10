@@ -6,6 +6,7 @@ const HamburgerMenuOverlay = ({
     items = [],
     buttonTop = "60px",
     buttonLeft = "60px",
+    buttonRight = null,
     buttonSize = "md",
     buttonColor = "#1a1a2e",
     overlayBackground = "linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #0d0d1a 100%)",
@@ -28,6 +29,10 @@ const HamburgerMenuOverlay = ({
     enableBlur = true,
     zIndex = 1000,
 }) => {
+    const usesRight = Boolean(buttonRight);
+    const xOrigin = usesRight ? `calc(100% - ${buttonRight})` : buttonLeft;
+    const xTranslate = usesRight ? "50%" : "-50%";
+    const mobileOrigin = usesRight ? "calc(100% - 40px)" : "40px";
     const [isOpen, setIsOpen] = useState(false);
     const navRef = useRef(null);
     const containerRef = useRef(null);
@@ -113,22 +118,23 @@ const HamburgerMenuOverlay = ({
             align-items: center;
             background: ${overlayBackground};
             z-index: ${zIndex};
-            clip-path: circle(0px at ${buttonLeft} ${buttonTop});
+            clip-path: circle(0px at ${xOrigin} ${buttonTop});
             transition: clip-path ${animationDuration}s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             pointer-events: none;
             ${enableBlur ? "backdrop-filter: blur(10px);" : ""}
           }
           
           .hamburger-overlay-${zIndex}.open {
-            clip-path: circle(150% at ${buttonLeft} ${buttonTop});
+            clip-path: circle(150% at ${xOrigin} ${buttonTop});
             pointer-events: auto;
           }
           
           .hamburger-button-${zIndex} {
             position: fixed;
-            left: ${buttonLeft};
+            left: ${usesRight ? "auto" : buttonLeft};
+            right: ${usesRight ? buttonRight : "auto"};
             top: ${buttonTop};
-            transform: translate(-50%, -50%);
+            transform: translate(${xTranslate}, -50%);
             border-radius: 16px;
             z-index: ${zIndex + 1};
             background: ${buttonColor};
@@ -140,7 +146,7 @@ const HamburgerMenuOverlay = ({
           }
           
           .hamburger-button-${zIndex}:hover {
-            transform: translate(-50%, -50%) scale(1.1);
+            transform: translate(${xTranslate}, -50%) scale(1.1);
             box-shadow: 0 6px 30px rgba(0, 0, 0, 0.4);
           }
           
@@ -217,16 +223,18 @@ const HamburgerMenuOverlay = ({
           /* Mobile responsiveness */
           @media (max-width: 768px) {
             .hamburger-button-${zIndex} {
-              left: 40px;
+              left: ${usesRight ? "auto" : "40px"};
+              right: ${usesRight ? "40px" : "auto"};
               top: 40px;
+              transform: translate(${xTranslate}, -50%);
             }
             
             .hamburger-overlay-${zIndex} {
-              clip-path: circle(0px at 40px 40px);
+              clip-path: circle(0px at ${mobileOrigin} 40px);
             }
             
             .hamburger-overlay-${zIndex}.open {
-              clip-path: circle(150% at 40px 40px);
+              clip-path: circle(150% at ${mobileOrigin} 40px);
             }
             
             .menu-items-${zIndex} {

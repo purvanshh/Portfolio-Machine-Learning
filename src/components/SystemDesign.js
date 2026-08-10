@@ -58,6 +58,7 @@ const systems = [
         name: 'PRGuard AI',
         tagline: 'Multi-agent code review with confidence arbitration',
         github: 'https://github.com/purvanshh/PRGuard-AI',
+        hasCaseStudy: true,
         pipeline: [
             { label: 'PR Event', sub: 'GitHub webhook' },
             { label: 'Validation', sub: 'HMAC · replay · rate limit' },
@@ -1010,6 +1011,258 @@ const PayShieldCaseStudyModal = ({ onClose }) => {
         </div>
     );
 };
+/* ── PRGuard AI Case Study Modal ── */
+const PRGuardCaseStudyModal = ({ onClose }) => {
+    React.useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        return () => { document.body.style.overflow = ''; };
+    }, []);
+    return (
+        <div className="sd-modal-overlay" onClick={onClose}>
+            <div className="sd-modal-container" onClick={(e) => e.stopPropagation()}>
+                <div className="sd-modal-header">
+                    <div>
+                        <div className="sd-modal-title">PRGuard AI</div>
+                        <div className="sd-modal-subtitle">System Design Case Study</div>
+                    </div>
+                    <button className="sd-modal-close-btn" onClick={onClose}>
+                        <X size={14} /> Close
+                    </button>
+                </div>
+                <div className="sd-modal-body">
+                    {/* 1. Overview */}
+                    <div>
+                        <div className="sd-modal-section-title">Overview</div>
+                        <div className="sd-modal-text">
+                            PRGuard AI is a production-grade, multi-agent pull request review system that analyzes PRs across style, logic, and security dimensions using a mix of rule-based detectors, tree-sitter AST parsing, and LLM reasoning. In a real-world evaluation against 50 CVE-fix PRs from python/cpython and nodejs/node, it achieved a 0.92 F1 score (0.92 precision, 0.92 recall). The system is built for production: async Celery task queues with retry, PostgreSQL audit logging, circuit breakers on LLM calls, Redis-backed token budgeting, HMAC webhook verification, replay protection, rate limiting, sandboxed repository cloning with LRU caching, and OpenTelemetry trace propagation.
+                        </div>
+                    </div>
+
+                    {/* 2. System Architecture */}
+                    <div>
+                        <div className="sd-modal-section-title">System Architecture</div>
+                        <div className="sd-modal-grid">
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title">Webhook Control Plane</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>
+                                    FastAPI receives POST /webhook, verifies the HMAC-SHA256 signature, rejects replays via X-GitHub-Delivery deduplication (Redis, 5-min TTL), validates payload timestamp (&lt; 2 min) and size (5 MB cap), then enforces per-repo and per-installation rate limits before enqueueing the review task.
+                                </div>
+                            </div>
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title">Agent Pipeline</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>
+                                    Style, Logic, and Security agents run as independent Celery tasks on dedicated queues with automatic retry (autoretry_for=(Exception,), retry_backoff=True, max_retries=1) and a hard 5-minute task timeout. The orchestrator runs round 0 in parallel, then a refinement loop (rounds 1–3) with a coordinator agent before arbitration.
+                                </div>
+                            </div>
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title">Confidence Arbitration</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>
+                                    Every finding carries a confidence_source tag (rule_based: 0.9, llm_reasoning: 0.6, inferred: 0.3). Per-agent score = (base_confidence + avg_issue_weight) / 2, clamped to [0, 1]. Aggregate = mean of agent scores with a +0.1 HIGH-severity boost (capped at 1.0). The arbitrator flags cross-agent disagreement.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* 3. System Architecture Diagram */}
+                    <div>
+                        <div className="sd-modal-section-title">System Architecture Diagram</div>
+                        <div className="sd-diagram-container">
+                            <svg viewBox="0 0 800 360" className="sd-diagram-svg">
+                                <defs>
+                                    <marker id="arrowPR" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                        <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#E7C38A" />
+                                    </marker>
+                                </defs>
+                                <rect x="20" y="25" width="110" height="50" rx="6" fill="rgba(19,22,27,0.8)" stroke="#E7C38A" strokeWidth="1.5"/>
+                                <text x="75" y="48" fill="#fff" fontSize="11" fontWeight="bold" textAnchor="middle">GitHub</text>
+                                <text x="75" y="62" fill="#9CA3AF" fontSize="8" textAnchor="middle">PR event webhook</text>
+                                <rect x="165" y="25" width="140" height="50" rx="6" fill="rgba(19,22,27,0.8)" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
+                                <text x="235" y="48" fill="#fff" fontSize="11" fontWeight="bold" textAnchor="middle">FastAPI Verify</text>
+                                <text x="235" y="62" fill="#9CA3AF" fontSize="8" textAnchor="middle">HMAC · replay · rate limit</text>
+                                <rect x="340" y="25" width="130" height="50" rx="6" fill="rgba(19,22,27,0.8)" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
+                                <text x="405" y="48" fill="#fff" fontSize="11" fontWeight="bold" textAnchor="middle">Repo Sandbox</text>
+                                <text x="405" y="62" fill="#9CA3AF" fontSize="8" textAnchor="middle">clone · index · LRU cache</text>
+                                <rect x="505" y="25" width="110" height="50" rx="6" fill="rgba(19,22,27,0.8)" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
+                                <text x="560" y="48" fill="#fff" fontSize="11" fontWeight="bold" textAnchor="middle">ChromaDB</text>
+                                <text x="560" y="62" fill="#9CA3AF" fontSize="8" textAnchor="middle">convention index</text>
+
+                                <rect x="20" y="155" width="130" height="50" rx="6" fill="rgba(19,22,27,0.8)" stroke="#E7C38A" strokeWidth="1.5" strokeDasharray="4 3"/>
+                                <text x="85" y="178" fill="#fff" fontSize="11" fontWeight="bold" textAnchor="middle">Celery Orchestrator</text>
+                                <text x="85" y="192" fill="#9CA3AF" fontSize="8" textAnchor="middle">enqueue · coordinate</text>
+                                <rect x="185" y="155" width="180" height="50" rx="6" fill="rgba(19,22,27,0.8)" stroke="#E7C38A" strokeWidth="2"/>
+                                <text x="275" y="178" fill="#fff" fontSize="11" fontWeight="bold" textAnchor="middle">Style · Logic · Security</text>
+                                <text x="275" y="192" fill="#9CA3AF" fontSize="8" textAnchor="middle">3× parallel Celery tasks</text>
+                                <rect x="400" y="155" width="150" height="50" rx="6" fill="rgba(19,22,27,0.8)" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
+                                <text x="475" y="178" fill="#fff" fontSize="11" fontWeight="bold" textAnchor="middle">Refinement Loop</text>
+                                <text x="475" y="192" fill="#9CA3AF" fontSize="8" textAnchor="middle">rounds 1–3 + coordinator</text>
+                                <rect x="585" y="155" width="130" height="50" rx="6" fill="rgba(19,22,27,0.8)" stroke="#E7C38A" strokeWidth="1.5"/>
+                                <text x="650" y="178" fill="#fff" fontSize="11" fontWeight="bold" textAnchor="middle">Confidence Arbitrator</text>
+                                <text x="650" y="192" fill="#9CA3AF" fontSize="8" textAnchor="middle">weighted scoring</text>
+
+                                <rect x="20" y="290" width="110" height="45" rx="6" fill="rgba(19,22,27,0.8)" stroke="rgba(255,255,255,0.12)" strokeWidth="1"/>
+                                <text x="75" y="311" fill="#fff" fontSize="10" textAnchor="middle">Redis</text>
+                                <text x="75" y="325" fill="#9CA3AF" fontSize="8" textAnchor="middle">context · broker · budget</text>
+                                <rect x="165" y="290" width="140" height="45" rx="6" fill="rgba(19,22,27,0.8)" stroke="rgba(255,255,255,0.12)" strokeWidth="1"/>
+                                <text x="235" y="311" fill="#fff" fontSize="10" textAnchor="middle">PostgreSQL</text>
+                                <text x="235" y="325" fill="#9CA3AF" fontSize="8" textAnchor="middle">audit log · reports</text>
+                                <rect x="340" y="290" width="130" height="45" rx="6" fill="rgba(19,22,27,0.8)" stroke="#E7C38A" strokeWidth="1.5"/>
+                                <text x="405" y="311" fill="#fff" fontSize="10" fontWeight="bold" textAnchor="middle">GitHub PR Review</text>
+                                <text x="405" y="325" fill="#9CA3AF" fontSize="8" textAnchor="middle">comment · inline · audit</text>
+                                <rect x="505" y="290" width="120" height="45" rx="6" fill="rgba(19,22,27,0.8)" stroke="rgba(255,255,255,0.12)" strokeWidth="1"/>
+                                <text x="565" y="311" fill="#fff" fontSize="10" textAnchor="middle">DeepSeek LLM</text>
+                                <text x="565" y="325" fill="#9CA3AF" fontSize="8" textAnchor="middle">circuit-breaker guarded</text>
+
+                                <line x1="130" y1="50" x2="165" y2="50" stroke="#E7C38A" strokeWidth="1.2" markerEnd="url(#arrowPR)"/>
+                                <line x1="305" y1="50" x2="340" y2="50" stroke="#E7C38A" strokeWidth="1.2" markerEnd="url(#arrowPR)"/>
+                                <line x1="470" y1="50" x2="505" y2="50" stroke="#E7C38A" strokeWidth="1.2" markerEnd="url(#arrowPR)"/>
+                                <path d="M 235 75 L 85 155" fill="none" stroke="#E7C38A" strokeWidth="1.2" markerEnd="url(#arrowPR)"/>
+                                <path d="M 560 75 L 560 110 L 275 110 L 275 155" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1" markerEnd="url(#arrowPR)"/>
+                                <line x1="150" y1="180" x2="185" y2="180" stroke="#E7C38A" strokeWidth="1.2" markerEnd="url(#arrowPR)"/>
+                                <line x1="365" y1="180" x2="400" y2="180" stroke="#E7C38A" strokeWidth="1.2" markerEnd="url(#arrowPR)"/>
+                                <line x1="550" y1="180" x2="585" y2="180" stroke="#E7C38A" strokeWidth="1.2" markerEnd="url(#arrowPR)"/>
+                                <path d="M 650 205 L 650 240 L 405 240 L 405 290" fill="none" stroke="#E7C38A" strokeWidth="1.2" markerEnd="url(#arrowPR)"/>
+                                <path d="M 75 290 L 75 205" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1" markerEnd="url(#arrowPR)"/>
+                                <path d="M 565 290 L 565 240 L 275 240 L 275 205" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1" strokeDasharray="3 2" markerEnd="url(#arrowPR)"/>
+                            </svg>
+                        </div>
+                    </div>
+
+                    {/* 4. Data Flow */}
+                    <div>
+                        <div className="sd-modal-section-title">Data Flow (Request Lifecycle)</div>
+                        <ul className="sd-modal-list">
+                            <li><strong>Ingestion:</strong> POST /webhook verifies HMAC-SHA256, deduplicates X-GitHub-Delivery in Redis (5-min TTL), validates timestamp and 5 MB payload size, then applies per-repo + per-installation rate limits.</li>
+                            <li><strong>Sandbox & Index:</strong> The repo is shallow-cloned into a sandboxed LRU cache (guaranteed cleanup), and repository conventions are embedded into the ChromaDB index for grounding.</li>
+                            <li><strong>Parallel Analysis:</strong> The orchestrator enqueues Style, Logic, and Security tasks onto dedicated Celery queues. Each agent builds a per-file tree-sitter AST summary, runs rule-based detectors, then grounds its LLM prompt with semantically similar ChromaDB examples.</li>
+                            <li><strong>Refinement Loop:</strong> Rounds 1–3 let agents revise findings after reviewing each other's output. The coordinator agent applies stopping conditions when the conversation converges.</li>
+                            <li><strong>Arbitration:</strong> The confidence arbitrator weights each finding by source, computes the aggregate confidence, and flags disagreement when one agent reports HIGH severity that another does not.</li>
+                            <li><strong>Delivery:</strong> Findings are posted as a PR comment plus up to 10 inline comments on diff lines. The full analysis trace is written to the PostgreSQL audit log and streamed live via WebSocket.</li>
+                        </ul>
+                    </div>
+
+                    {/* 5. Agent Breakdown */}
+                    <div>
+                        <div className="sd-modal-section-title">Agent Breakdown</div>
+                        <div className="sd-modal-grid">
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title">Style Agent</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>
+                                    Two-pass approach: rule-based string matching (tab indentation, lines exceeding 120 characters) plus LLM-guided analysis grounded in semantically similar ChromaDB code to check naming conventions, docstring consistency, and file structure.
+                                </div>
+                            </div>
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title">Logic Agent</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>
+                                    Three-pass: rule-based pattern matching on added lines (bare except:, unresolved TODOs), tree-sitter AST summaries (Python, Go, TypeScript, Rust), and LLM reasoning over the AST + diff context for off-by-one errors, null dereferences, boundary conditions, and unhandled exceptions.
+                                </div>
+                            </div>
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title">Security Agent</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>
+                                    Rule-based regex detection (eval()/exec(), SQL injection patterns, hardcoded secrets) plus security-focused LLM prompting for command injection, unsafe deserialization, privilege escalation, SSRF, and path traversal. Each detector is independently exported and testable.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* 6. Production Incident */}
+                    <div>
+                        <div className="sd-modal-section-title">Production Incident: The Batch Review That Vanished</div>
+                        <div className="sd-modal-text" style={{ marginBottom: '16px' }}>
+                            Running 40 PRs through the batch evaluator launched 4 parallel workers. Twenty minutes later — no output, no errors, no results file. The process had been silently killed with no crash log or traceback.
+                        </div>
+                        <div className="sd-modal-grid">
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title" style={{ color: 'var(--accent-text)' }}>Root Cause Chain</div>
+                                <ul className="sd-modal-list" style={{ fontSize: '12.5px' }}>
+                                    <li>ThreadPoolExecutor context manager exits on any unhandled exception in a worker thread</li>
+                                    <li>The security agent's _parse_llm_issues calls json.loads() on the LLM response</li>
+                                    <li>DeepSeek occasionally truncates JSON mid-string (one response ended with an unclosed quote)</li>
+                                    <li>JSONDecodeError propagated uncaught out of the worker thread</li>
+                                    <li>with ThreadPoolExecutor() as pool: killed the remaining workers on exit</li>
+                                    <li>No try/except, no finally block to flush partial results</li>
+                                </ul>
+                            </div>
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title">The Fix That Held</div>
+                                <ul className="sd-modal-list" style={{ fontSize: '12.5px' }}>
+                                    <li>Wrapped json.loads() in try/except that records the raw response for debugging instead of crashing</li>
+                                    <li>Incremental checkpoints — results saved after every completed PR instead of once at the end</li>
+                                    <li>Added --resume flag that skips already-completed PRs by reading the partial results file</li>
+                                </ul>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px', marginTop: '10px' }}>
+                                    The cosmetic gap: TokenBudget.used returned 0 for all 40 PRs. The batch runner's token_budget was never wired into the agents — each agent constructs its own LLMClient internally instead of forwarding the one passed in. Unfixed because it doesn't affect correctness.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* 7. Engineering Decisions */}
+                    <div>
+                        <div className="sd-modal-section-title">Engineering Decisions</div>
+                        <div className="sd-modal-grid">
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title">Why multi-agent?</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>3× LLM cost, but enables cross-concern disagreement detection — a signal no single agent can produce. The arbitrator surfaces when one agent reports HIGH severity that another misses.</div>
+                            </div>
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title">Why hybrid scoring?</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>Rule-based findings carry 0.9 weight vs 0.6 for LLM output. Prevents confidence inflation from speculative LLM reasoning while trusting deterministic detectors.</div>
+                            </div>
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title">Why async Celery?</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>GitHub webhooks time out at 10s while agent analysis takes 15–30s. Not a preference — a hard constraint. Dedicated queues and retry with exponential backoff guarantee delivery.</div>
+                            </div>
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title">Why refinement loop?</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>Adds latency but reduces false positives; agents can revise findings after reviewing other agents' output across 3 rounds, with coordinator-driven stopping conditions.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* 8. Evaluation */}
+                    <div>
+                        <div className="sd-modal-section-title">Evaluation</div>
+                        <div className="sd-modal-grid">
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title">Real-World CVE (50 PRs)</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>0.92 F1 (0.92 precision, 0.92 recall) across python/cpython and nodejs/node. Batch 2: 17/17 security PRs detected with zero false negatives. The only false positive flagged a legitimate DER certificate concern that was not CVE-tagged.</div>
+                            </div>
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title">Synthetic Benchmark (200 PRs)</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>0.82 F1 (0.71 precision, 0.96 recall) in the CI regression gate. Real-world F1 exceeding synthetic F1 indicates the system generalizes to unseen real-world patches.</div>
+                            </div>
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title">Test Suite</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>288 tests at 77% coverage, enforcing a 70% minimum gate in CI. Covers diff parsing, agent analysis, arbitration, circuit breakers, token budgeting, and the end-to-end pipeline.</div>
+                            </div>
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title">Cost & Latency</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>Median review &lt; 30s per PR across the async pipeline. Each PR triggers 12+ LLM calls; at DeepSeek pricing a moderate PR costs ~$0.01–0.03, with circuit breaker + token budget guarding runaway spend.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* 9. Technologies & Tools */}
+                    <div>
+                        <div className="sd-modal-section-title">Technologies & Tools</div>
+                        <table className="sd-modal-tech-table">
+                            <tbody>
+                                <tr><td className="sd-modal-tech-label">Backend & Worker</td><td>Python 3.11 · FastAPI · Celery · Redis · Uvicorn</td></tr>
+                                <tr><td className="sd-modal-tech-label">AI & Analysis</td><td>DeepSeek (deepseek-chat) · tree-sitter AST · ChromaDB RAG · prompt templates</td></tr>
+                                <tr><td className="sd-modal-tech-label">Data & Storage</td><td>PostgreSQL · Redis (data + broker) · ChromaDB · Alembic migrations</td></tr>
+                                <tr><td className="sd-modal-tech-label">Security</td><td>HMAC-SHA256 · replay protection · rate limiting · sandboxed clones · token budgeting · LLM output sanitization</td></tr>
+                                <tr><td className="sd-modal-tech-label">Observability</td><td>Prometheus metrics · structured JSON logs · OpenTelemetry · WebSocket events</td></tr>
+                                <tr><td className="sd-modal-tech-label">DevOps & Infra</td><td>Docker · Docker Compose · Kubernetes Helm · Terraform · GitHub Actions CI</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 /* ── Main SystemDesign Component ── */
 const SystemDesign = () => {
     const [selectedSystem, setSelectedSystem] = useState(null);
@@ -1035,6 +1288,9 @@ const SystemDesign = () => {
             )}
             {selectedSystem === 'PayShield' && (
                 <PayShieldCaseStudyModal onClose={() => setSelectedSystem(null)} />
+            )}
+            {selectedSystem === 'PRGuard AI' && (
+                <PRGuardCaseStudyModal onClose={() => setSelectedSystem(null)} />
             )}
         </section>
     );

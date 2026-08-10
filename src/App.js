@@ -49,10 +49,10 @@ function App() {
         <HamburgerMenuOverlay
           items={mobileItems}
           buttonTop="50px"
-          buttonLeft="calc(100% - 50px)"
+          buttonRight="50px"
           buttonSize="md"
-          buttonColor="rgba(20, 20, 35, 0.9)"
-          overlayBackground="linear-gradient(135deg, rgba(10, 10, 20, 0.98) 0%, rgba(20, 20, 40, 0.98) 50%, rgba(10, 10, 25, 0.98) 100%)"
+          buttonColor="rgba(19, 22, 27, 0.92)"
+          overlayBackground="linear-gradient(135deg, rgba(11, 13, 16, 0.98) 0%, rgba(19, 22, 27, 0.98) 50%, rgba(9, 11, 14, 0.98) 100%)"
           textColor="#ffffff"
           fontSize="lg"
           enableBlur={true}
