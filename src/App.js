@@ -48,8 +48,8 @@ function App() {
       <div className="mobile-menu-wrap">
         <HamburgerMenuOverlay
           items={mobileItems}
-          buttonTop="50px"
-          buttonRight="50px"
+          buttonTop="28px"
+          buttonRight="44px"
           buttonSize="md"
           buttonColor="rgba(19, 22, 27, 0.92)"
           overlayBackground="linear-gradient(135deg, rgba(11, 13, 16, 0.98) 0%, rgba(19, 22, 27, 0.98) 50%, rgba(9, 11, 14, 0.98) 100%)"

@@ -32,7 +32,10 @@ const HamburgerMenuOverlay = ({
     const usesRight = Boolean(buttonRight);
     const xOrigin = usesRight ? `calc(100% - ${buttonRight})` : buttonLeft;
     const xTranslate = usesRight ? "50%" : "-50%";
-    const mobileOrigin = usesRight ? "calc(100% - 40px)" : "40px";
+    const mobileTop = "28px";
+    const mobileRight = usesRight ? "44px" : "40px";
+    const mobileLeft = usesRight ? "auto" : "40px";
+    const mobileOrigin = usesRight ? "calc(100% - 44px)" : "40px";
     const [isOpen, setIsOpen] = useState(false);
     const navRef = useRef(null);
     const containerRef = useRef(null);
@@ -135,22 +138,19 @@ const HamburgerMenuOverlay = ({
             right: ${usesRight ? buttonRight : "auto"};
             top: ${buttonTop};
             transform: translate(${xTranslate}, -50%);
-            border-radius: 16px;
+            border-radius: 12px;
             z-index: ${zIndex + 1};
-            background: ${buttonColor};
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: transparent;
             cursor: pointer;
             transition: all 0.3s ease;
             pointer-events: auto;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
           }
           
           .hamburger-button-${zIndex}:hover {
-            transform: translate(${xTranslate}, -50%) scale(1.1);
-            box-shadow: 0 6px 30px rgba(0, 0, 0, 0.4);
+            transform: translate(${xTranslate}, -50%) scale(1.12);
           }
           
-          .hamburger-button-${zIndex}:focus {
+          .hamburger-button-${zIndex}:focus-visible {
             outline: 2px solid ${textColor};
             outline-offset: 2px;
           }
@@ -223,18 +223,18 @@ const HamburgerMenuOverlay = ({
           /* Mobile responsiveness */
           @media (max-width: 768px) {
             .hamburger-button-${zIndex} {
-              left: ${usesRight ? "auto" : "40px"};
-              right: ${usesRight ? "40px" : "auto"};
-              top: 40px;
+              left: ${mobileLeft};
+              right: ${mobileRight};
+              top: ${mobileTop};
               transform: translate(${xTranslate}, -50%);
             }
             
             .hamburger-overlay-${zIndex} {
-              clip-path: circle(0px at ${mobileOrigin} 40px);
+              clip-path: circle(0px at ${mobileOrigin} ${mobileTop});
             }
             
             .hamburger-overlay-${zIndex}.open {
-              clip-path: circle(150% at ${mobileOrigin} 40px);
+              clip-path: circle(150% at ${mobileOrigin} ${mobileTop});
             }
             
             .menu-items-${zIndex} {
