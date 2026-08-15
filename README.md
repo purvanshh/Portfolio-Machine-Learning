@@ -13,7 +13,7 @@ Uncertainty-aware incident reasoning with LangGraph orchestration. Features a 4-
 Multi-agent pull request review system with 3 parallel Celery agents (Style, Logic, Security) combining deterministic rules, tree-sitter AST analysis, and DeepSeek LLM reasoning. Achieves **0.92 F1** on 50 real-world CVE-fix PRs from python/cpython and nodejs/node. Features HMAC webhook verification, replay protection, rate limiting, sandboxed repo clones, PostgreSQL audit logging, and OpenTelemetry tracing.
 
 ### [DRISE](https://github.com/purvanshh/DRISE-experiments)
-Document intelligence engine combining LayoutLMv3 with deterministic post-processing for key-value extraction. Reaches 0.58 Field F1 (p=0.004 over LLM baselines), enforces 100% schema validity, and delivers sub-300ms inference. Defense-in-depth security with magic-byte validation.
+Document intelligence engine combining a fine-tuned LayoutLMv3 stack with deterministic post-processing for trustworthy structured extraction. Reaches 0.8704 validation F1, enforces 100% schema-valid JSON, benchmarks against LLM-only and RAG+LLM baselines on 201 annotated documents, and runs at roughly $0.000049 per document with defense-in-depth upload validation.
 
 ### [GitHub Codebase Intelligence](https://github.com/purvanshh/github-rag)
 Graph-aware RAG for code understanding: tree-sitter AST parsing → symbol-level chunking → ChromaDB embeddings → graph expansion via import/call relationships → cross-encoder reranking. Every answer cites file, symbol, and line number.
@@ -23,7 +23,7 @@ Auditable credit decision engine with XGBoost ML scoring (0.975 AUC-ROC) and det
 
 ## System Design
 
-Architecture deep-dives for every system — pipeline flows, failure paths, decision logic, support systems, engineering tradeoffs, and impact metrics.
+Architecture deep-dives for every flagship system — now including DRISE — with pipeline flows, failure paths, decision logic, support systems, engineering tradeoffs, case-study detail, and impact metrics.
 
 ## Tech Stack
 

@@ -102,6 +102,58 @@ const systems = [
         ],
     },
     {
+        name: 'DRISE',
+        tagline: 'Layout-aware document intelligence with deterministic structured extraction',
+        github: 'https://github.com/purvanshh/DRISE-experiments',
+        hasCaseStudy: true,
+        pipeline: [
+            { label: 'Upload', sub: 'PDF / image intake' },
+            { label: 'Validation', sub: 'extension · MIME · magic bytes' },
+            { label: 'OCR + Layout', sub: 'PaddleOCR + bbox extraction', highlight: true },
+            { label: 'LayoutLMv3', sub: 'token classification' },
+            { label: 'Recovery', sub: 'category-aware grouping' },
+            { label: 'Constraints', sub: 'normalize · validate · reconcile' },
+            { label: 'JSON Output', sub: 'typed schema + confidence' },
+        ],
+        supportSystems: {
+            security: ['Extension + MIME + magic-byte validation', 'Malformed PDF rejection', 'Path traversal prevention', 'Typed request validation via Pydantic'],
+            reliability: ['Deterministic post-processing pipeline', 'Batch-safe cleanup routines', 'Constraint-based repair path', 'Explicit schema contracts between stages'],
+            data: ['PaddleOCR token stream', 'LayoutLMv3 fine-tuned checkpoint', 'Structured JSON outputs', 'Benchmark datasets: CORD · FUNSD · 201 annotated docs'],
+            observability: ['Per-field confidence traces', 'Ablation framework', 'Benchmark runner with McNemar tests', 'Latency + cost comparison tables'],
+        },
+        failurePath: {
+            trigger: 'OCR artifacts or layout ambiguity cause invalid totals, fragmented fields, or malformed extraction spans',
+            flow: [
+                'OCR emits noisy tokens or bounding boxes',
+                'LayoutLMv3 predicts fragmented KEY/VALUE spans',
+                'Category-aware grouping attempts entity reconstruction',
+                'Normalization repairs dates, currencies, and OCR artifacts',
+                'Constraint engine checks line-item sums, totals, and required fields before emission'
+            ],
+            outcome: 'The system fails safe into deterministic validation and repair rather than hallucinating missing values. Outputs remain schema-valid and auditable even when raw OCR quality degrades.',
+        },
+        decisionLogic: {
+            title: 'How document structure becomes trusted JSON',
+            steps: [
+                { label: 'Validated Intake', detail: 'Only supported files proceed past extension, MIME, magic-byte, and size checks before rasterization.' },
+                { label: 'Spatial Extraction', detail: 'PaddleOCR returns tokens, bounding boxes, and confidences; LayoutLMv3 jointly reasons over text, geometry, and page pixels.' },
+                { label: 'Entity Reconstruction', detail: 'BIO predictions are grouped into semantic entities with category propagation to preserve multi-token keys, totals, and line items.' },
+                { label: 'Deterministic Trust Layer', detail: 'Normalization, regex validation, and cross-field constraints enforce schema validity and numeric consistency before final JSON is returned.' },
+            ],
+        },
+        decisions: [
+            { point: 'Why LayoutLMv3 instead of OCR-only?', tradeoff: 'OCR-only pipelines read text but not structure. Bounding-box and visual context are necessary to distinguish labels, values, and tables across vendor layout drift.' },
+            { point: 'Why deterministic post-processing after the model?', tradeoff: 'The model improves recall, but enterprise ingestion needs guarantees. Deterministic normalization and constraints remove hallucination risk and make repeated runs identical.' },
+            { point: 'Why benchmark against LLM and RAG baselines?', tradeoff: 'Raw accuracy claims mean little without a reference point. Side-by-side evaluation on 201 annotated documents makes the cost, latency, and trust tradeoffs visible.' },
+        ],
+        metrics: [
+            { value: '0.8704', label: 'Val F1', detail: 'fine-tuned LayoutLMv3 run' },
+            { value: '100%', label: 'Schema Validity', detail: 'validated JSON outputs' },
+            { value: '$0.000049', label: 'Cost / Doc', detail: 'self-hosted extraction path' },
+            { value: '349ms', label: 'CPU Latency', detail: 'average per document' },
+        ],
+    },
+    {
         name: 'AuditLend Intelligence Core (ALICe)',
         tagline: 'Calibrated XGBoost credit scorer · SHAP explainability · immutable audit trail · full ML lifecycle',
         github: 'https://github.com/purvanshh/AuditLend-Intelligence-Core--ALICe-',
@@ -713,6 +765,158 @@ const SentinelOpsCaseStudyModal = ({ onClose }) => {
     );
 };
 
+/* ── DRISE Case Study Modal ── */
+const DRISECaseStudyModal = ({ onClose }) => {
+    React.useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        return () => { document.body.style.overflow = ''; };
+    }, []);
+
+    return (
+        <div className="sd-modal-overlay" onClick={onClose}>
+            <div className="sd-modal-container" onClick={(e) => e.stopPropagation()}>
+                <div className="sd-modal-header">
+                    <div>
+                        <div className="sd-modal-title">DRISE</div>
+                        <div className="sd-modal-subtitle">System Design Case Study</div>
+                    </div>
+                    <button className="sd-modal-close-btn" onClick={onClose}>
+                        <X size={14} /> Close
+                    </button>
+                </div>
+                <div className="sd-modal-body">
+                    <div>
+                        <div className="sd-modal-section-title">Overview</div>
+                        <div className="sd-modal-text">
+                            DRISE is a document intelligence system built to turn messy PDFs, receipts, invoices, and scanned forms into validated structured JSON without the usual tradeoff between extraction quality and operational trust. It combines a fine-tuned LayoutLMv3 model with a deterministic post-processing and constraint layer, delivering layout-aware extraction, 100% schema-valid outputs, and materially lower per-document cost than LLM-only pipelines.
+                        </div>
+                    </div>
+
+                    <div>
+                        <div className="sd-modal-section-title">System Architecture</div>
+                        <div className="sd-modal-grid">
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title">Secure Ingestion Layer</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>
+                                    FastAPI receives file uploads, validates extension, MIME type, magic bytes, and file size, then rasterizes PDFs into page images. This keeps malformed or adversarial files out of the OCR and model path before compute is spent.
+                                </div>
+                            </div>
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title">OCR + Layout Model</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>
+                                    PaddleOCR extracts tokens, confidences, and bounding boxes. A CORD + FUNSD fine-tuned LayoutLMv3 checkpoint then performs token classification over text, geometry, and page pixels to separate keys, values, and background tokens.
+                                </div>
+                            </div>
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title">Deterministic Trust Layer</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>
+                                    Category-aware grouping, locale-aware recovery, normalization, regex validation, and cross-field constraints convert noisy token predictions into typed JSON with per-field confidence and reconciliation flags.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div className="sd-modal-section-title">Architecture Diagram</div>
+                        <div className="sd-diagram-container">
+                            <svg viewBox="0 0 800 300" className="sd-diagram-svg">
+                                <defs>
+                                    <marker id="arrowD" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                        <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#E7C38A" />
+                                    </marker>
+                                </defs>
+                                <rect x="20" y="35" width="120" height="55" rx="6" fill="rgba(19,22,27,0.8)" stroke="#E7C38A" strokeWidth="1.5"/>
+                                <text x="80" y="58" fill="#fff" fontSize="10" fontWeight="bold" textAnchor="middle">Upload API</text>
+                                <text x="80" y="73" fill="#9CA3AF" fontSize="8" textAnchor="middle">PDF / image intake</text>
+                                <rect x="170" y="35" width="145" height="55" rx="6" fill="rgba(19,22,27,0.8)" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
+                                <text x="242.5" y="58" fill="#fff" fontSize="10" fontWeight="bold" textAnchor="middle">Validation Gate</text>
+                                <text x="242.5" y="73" fill="#9CA3AF" fontSize="8" textAnchor="middle">ext · MIME · magic bytes</text>
+                                <rect x="345" y="35" width="135" height="55" rx="6" fill="rgba(19,22,27,0.8)" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
+                                <text x="412.5" y="58" fill="#fff" fontSize="10" fontWeight="bold" textAnchor="middle">Rasterize + OCR</text>
+                                <text x="412.5" y="73" fill="#9CA3AF" fontSize="8" textAnchor="middle">pages · tokens · bboxes</text>
+                                <rect x="510" y="35" width="135" height="55" rx="6" fill="rgba(19,22,27,0.8)" stroke="#E7C38A" strokeWidth="1.5"/>
+                                <text x="577.5" y="58" fill="#fff" fontSize="10" fontWeight="bold" textAnchor="middle">LayoutLMv3</text>
+                                <text x="577.5" y="73" fill="#9CA3AF" fontSize="8" textAnchor="middle">BIO token classes</text>
+                                <rect x="675" y="35" width="105" height="55" rx="6" fill="rgba(19,22,27,0.8)" stroke="#E7C38A" strokeWidth="1.5"/>
+                                <text x="727.5" y="58" fill="#fff" fontSize="10" fontWeight="bold" textAnchor="middle">JSON Output</text>
+                                <text x="727.5" y="73" fill="#9CA3AF" fontSize="8" textAnchor="middle">typed + trusted</text>
+
+                                <rect x="200" y="165" width="400" height="70" rx="8" fill="rgba(19,22,27,0.8)" stroke="rgba(255,255,255,0.12)" strokeWidth="1"/>
+                                <text x="400" y="192" fill="#E7C38A" fontSize="11" fontWeight="bold" textAnchor="middle">Deterministic Post-Processing Layer</text>
+                                <text x="400" y="210" fill="#fff" fontSize="9" textAnchor="middle">category grouping · locale-aware recovery · normalization · validation · constraints</text>
+                                <text x="400" y="225" fill="#9CA3AF" fontSize="8" textAnchor="middle">same input -> same output, with schema checks before emission</text>
+
+                                <rect x="20" y="245" width="150" height="35" rx="6" fill="rgba(19,22,27,0.8)" stroke="rgba(255,255,255,0.1)" strokeWidth="1"/>
+                                <text x="95" y="266" fill="#fff" fontSize="9" textAnchor="middle">Benchmark Runner</text>
+                                <rect x="620" y="245" width="160" height="35" rx="6" fill="rgba(19,22,27,0.8)" stroke="rgba(255,255,255,0.1)" strokeWidth="1"/>
+                                <text x="700" y="266" fill="#fff" fontSize="9" textAnchor="middle">LLM / RAG Baselines</text>
+
+                                <line x1="140" y1="62" x2="170" y2="62" stroke="#E7C38A" strokeWidth="1.2" markerEnd="url(#arrowD)"/>
+                                <line x1="315" y1="62" x2="345" y2="62" stroke="#E7C38A" strokeWidth="1.2" markerEnd="url(#arrowD)"/>
+                                <line x1="480" y1="62" x2="510" y2="62" stroke="#E7C38A" strokeWidth="1.2" markerEnd="url(#arrowD)"/>
+                                <line x1="645" y1="62" x2="675" y2="62" stroke="#E7C38A" strokeWidth="1.2" markerEnd="url(#arrowD)"/>
+                                <path d="M 577 90 L 577 135 L 520 165" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1" markerEnd="url(#arrowD)"/>
+                                <path d="M 400 165 L 400 120 L 690 120 L 690 90" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1" markerEnd="url(#arrowD)"/>
+                                <path d="M 170 262 L 250 235" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1" markerEnd="url(#arrowD)"/>
+                                <path d="M 620 262 L 550 235" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1" markerEnd="url(#arrowD)"/>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div className="sd-modal-section-title">Data Flow (Extraction Lifecycle)</div>
+                        <ul className="sd-modal-list">
+                            <li><strong>Ingestion:</strong> `/parse-document` or `/parse-batch` validates file type, checks magic bytes, and rejects malformed uploads before any OCR or model inference begins.</li>
+                            <li><strong>Page Preparation:</strong> PDFs are rasterized page-wise and normalized deterministically so OCR inputs are stable across repeated runs.</li>
+                            <li><strong>Spatial Understanding:</strong> PaddleOCR extracts text plus geometry, and LayoutLMv3 predicts BIO labels with semantic categories for keys, values, and supporting spans.</li>
+                            <li><strong>Recovery:</strong> Grouping logic reconstructs multi-token entities, repairs OCR artifacts, and recovers locale-sensitive totals and line items missed by the raw model pass.</li>
+                            <li><strong>Trust Gate:</strong> Validation and constraint checks enforce typing, required fields, and invariants such as line-item sums approximately matching total amount before final JSON is emitted.</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <div className="sd-modal-section-title">Benchmarking & Case Study</div>
+                        <div className="sd-modal-grid">
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title">Why this architecture won</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>
+                                    The key insight was that extraction quality alone was not enough. DRISE pairs model intelligence with deterministic enforcement, so it can beat OCR-only pipelines on structure while staying cheaper and more auditable than LLM-driven extraction.
+                                </div>
+                            </div>
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title">Evidence</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>
+                                    Fine-tuning pushed the model from a 0.625 masked micro-F1 starting point to 0.8704 validation F1 and 0.8576 token-level F1 on CORD. The benchmark suite compares DRISE, LLM-only, and RAG+LLM pipelines across 201 annotated documents with McNemar significance testing and ablations.
+                                </div>
+                            </div>
+                            <div className="sd-modal-grid-card">
+                                <div className="sd-modal-grid-card-title">Operational outcome</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>
+                                    The production-facing API returns typed JSON with per-field confidence, 100% schema validity, and roughly $0.000049 per-document cost, making it viable for high-volume finance and enterprise ingestion workflows.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div className="sd-modal-section-title">Technologies & Tools</div>
+                        <table className="sd-modal-tech-table">
+                            <tbody>
+                                <tr><td className="sd-modal-tech-label">API & Contracts</td><td>Python 3.11 · FastAPI · Pydantic · Uvicorn</td></tr>
+                                <tr><td className="sd-modal-tech-label">OCR & Vision</td><td>PaddleOCR · PDF rasterization · image normalization</td></tr>
+                                <tr><td className="sd-modal-tech-label">Modeling</td><td>PyTorch · LayoutLMv3 · token classification · CORD + FUNSD fine-tune</td></tr>
+                                <tr><td className="sd-modal-tech-label">Trust Layer</td><td>Deterministic grouping · locale-aware recovery · regex validation · constraint engine</td></tr>
+                                <tr><td className="sd-modal-tech-label">Evaluation</td><td>Ablation studies · McNemar exact test · cost/latency benchmarks · baseline runner</td></tr>
+                                <tr><td className="sd-modal-tech-label">Deployment</td><td>Docker · batch ingestion · background cleanup</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 /* ── ALICe Case Study Modal ── */
 const ALICeCaseStudyModal = ({ onClose }) => {
     React.useEffect(() => {
@@ -1282,6 +1486,9 @@ const SystemDesign = () => {
 
             {selectedSystem === 'SentinelOps AI' && (
                 <SentinelOpsCaseStudyModal onClose={() => setSelectedSystem(null)} />
+            )}
+            {selectedSystem === 'DRISE' && (
+                <DRISECaseStudyModal onClose={() => setSelectedSystem(null)} />
             )}
             {selectedSystem === 'AuditLend Intelligence Core (ALICe)' && (
                 <ALICeCaseStudyModal onClose={() => setSelectedSystem(null)} />

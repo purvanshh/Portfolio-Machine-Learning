@@ -281,7 +281,7 @@
 /* ============ Proficiencies ============ */
 .proficiency-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 16px;
 }
 
@@ -319,6 +319,18 @@
     color: var(--accent-text);
     border-color: rgba(231, 195, 138, 0.3);
     background: rgba(231, 195, 138, 0.05);
+}
+
+@media (max-width: 1200px) {
+    .proficiency-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 720px) {
+    .proficiency-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* ============ Contact ============ */
