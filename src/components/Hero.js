@@ -8,8 +8,6 @@ function Hero() {
             <p className="hero-role">ML Research Intern @ IIT Madras · Applied AI Systems</p>
             <div className="hero-meta">
                 <span>Bangalore, India</span>
-                <span className="hero-meta-dot">·</span>
-                <span>+91 91713 03506</span>
             </div>
             <p className="hero-bio">
                 Engineer focused on production-grade ML systems — multi-agent orchestration, document
