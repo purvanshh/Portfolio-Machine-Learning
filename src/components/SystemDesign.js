@@ -201,48 +201,48 @@ const systems = [
     },
     {
         name: 'PayShield',
-        tagline: 'Multi-layer UPI fraud scoring · GNN graph intelligence · 14-agent orchestration · production-ready ops',
+        tagline: 'Return-risk scoring for Indian e-commerce · XGBoost PR-AUC 0.807 · ₹17.5L/month saved · config-driven gates',
         github: 'https://github.com/purvanshh/PayShield',
         hasCaseStudy: true,
         pipeline: [
-            { label: 'Transaction', sub: 'POST /v1/score · API key auth' },
-            { label: 'L1: Statistical', sub: 'velocity · geo · Benford (12 rules)' },
-            { label: 'Decision Gate', sub: 'BLOCK → WS alert · ESCALATE', highlight: true },
-            { label: 'L2: GNN', sub: 'PyTorch Geometric · hetero graph' },
-            { label: 'Fusion Engine', sub: 'weighted fusion + isotonic calib' },
-            { label: 'L3: LLM (async)', sub: 'Ollama · Celery · investigation report' },
+            { label: 'order.paid', sub: 'Razorpay webhook → POST /v1/return/score' },
+            { label: 'Feature Engine', sub: '7 features + Redis profiles' },
+            { label: 'Rules Engine', sub: '8 YAML config-driven rules' },
+            { label: 'Decision Gate', sub: 'LOW / MEDIUM / HIGH', highlight: true },
+            { label: 'XGBoost Primary', sub: '200 trees · tuned · 0.8067 PR-AUC' },
+            { label: 'Fallback Composite', sub: 'hand-weighted · interpretable' },
         ],
         supportSystems: {
-            security: ['API key + JWT bearer auth (RBAC)', 'PCI-DSS 10 controls', 'OFAC/UN sanctions screening', 'AML velocity + structuring check', 'KYC tier verification', 'Security headers middleware'],
-            reliability: ['Redis circuit breaker + fallback cache', 'Celery async task queue (investigation)', 'NetworkX fallback graph DB (Neo4j offline)', 'Graceful degradation on Ollama unavailability', 'Kubernetes HPA + PDBs + network policies'],
-            data: ['PostgreSQL (users, audit, investigations, API keys)', 'Neo4j (fraud entity graph: users, merchants, devices)', 'Redis (cache, rate limit, Celery broker, feature store)', 'Vite + React TypeScript dashboard'],
-            observability: ['Prometheus metrics + Grafana dashboards', 'Structlog structured logging', 'Population Stability Index drift detection', 'SLO definitions + error budget tracking', '5 chaos experiments (api, neo4j, ollama, pg, redis)'],
+            security: ['API key + RBAC auth', 'PCI-DSS / RBI / EU AI Act scoped out of PoC', 'audit-chain infra (hash-chained JSONL, PII masking)', 'signed webhook verification'],
+            reliability: ['Redis-backed user/merchant profiles', 'config-driven rules hot-reload (YAML)', 'hand-weighted composite as always-on fallback', 'champion/challenger A/B harness', 'Docker Compose hermetic stack'],
+            data: ['Redis (user history, merchant baselines, return zsets)', 'feature engine + lookup tables', 'synthetic DGP with hidden confounders', 'PSI drift monitoring on feature surface'],
+            observability: ['PR-AUC / precision / recall / F1 evals', 'ablation + tuning scripts', 'cost-model calculator + vertical sensitivity', 'live verification of 10 scenarios'],
         },
         failurePath: {
-            trigger: 'Neo4j graph DB latency spike blocking synchronous L2 GNN feature extraction',
-            flow: ['L2 GNN feature engine calls Neo4j for entity graph features', 'Query latency exceeds scoring SLA threshold', 'Redis feature store checked for cached entity features', 'If cache miss: structural heuristic features computed in-process', 'Scoring proceeds with degraded graph features; L1 statistical score still authoritative'],
-            outcome: 'L1+L2 scoring stays under 50ms p50. L3 LLM investigation runs async via Celery regardless — graph DB recovery is transparent to the scoring path.',
+            trigger: 'PSI drift report read 43.4 — a false alarm from a broken estimator masking real drift',
+            flow: ['PSI estimator used 10 fixed bins on 14 discrete samples', 'zero-mass bins produced division by ~zero', 'density=True caused double normalization', 'shared quantile edges + adaptive bin count (max(3, n//5))', 'Laplace smoothing stabilizes zero-count bins'],
+            outcome: 'Real drift case now reads 3.86 — credible and actionable; the fix generalized to all feature-bucket comparisons.',
         },
         decisionLogic: {
-            title: 'How fraud scores are computed',
+            title: 'How return risk is scored',
             steps: [
-                { label: 'L1 Statistical Filter', detail: '12 configurable YAML rules: velocity (6), geo-velocity (4), Benford\'s Law (2)' },
-                { label: 'L2 GNN Inference', detail: 'Heterogeneous graph: User/Merchant/Device/Transaction nodes; edge features + message passing' },
-                { label: 'Ensemble Fusion', detail: 'Weighted L1 + L2 combination → Isotonic calibration → calibrated P(fraud)' },
-                { label: 'Decision Gate', detail: 'ALLOW / BLOCK / REVIEW threshold; BLOCK broadcasts WebSocket alert + queues LLM investigation' },
+                { label: 'Feature Engine', detail: '7 features: return rates 30d/90d, amount risk, category baseline, COD refusal, velocity 7d, serial returner flag' },
+                { label: 'Rules Engine', detail: '8 config-driven rules gate known patterns before ML; thresholds hot-reload from YAML' },
+                { label: 'XGBoost Primary', detail: '200 trees, max_depth=3, lr=0.05, spw=1.5 — captures nonlinear interactions' },
+                { label: 'Tiered Gate', detail: 'LOW → ship · MEDIUM → FLAG_FOR_REVIEW · HIGH → REQUIRE_PREPAID; threshold per vertical' },
             ],
         },
         decisions: [
-            { point: 'Why a heterogeneous GNN?', tradeoff: 'Per-transaction rules miss ring fraud (shared devices across accounts, velocity rings, merchant collusion). A graph over User/Merchant/Device/Transaction nodes captures cross-entity signals invisible to flat feature vectors.' },
-            { point: 'Why async L3 LLM investigation?', tradeoff: 'Ollama inference takes 2–10s — blocking the scoring path would violate the <100ms SLA. Celery decouples investigation from decision, so BLOCK is immediate while the report is generated in the background.' },
-            { point: 'Why 14 agents?', tradeoff: 'Monolithic scoring cannot self-correct. The reflection agent clusters false positives nightly and auto-tunes thresholds; the critic agent evaluates decision quality; human-review and mitigation agents handle edge cases — each concern is isolated and independently replaceable.' },
-            { point: 'Why PCI-DSS + RBI + EU AI Act in one stack?', tradeoff: 'UPI payments touch Indian (RBI) data residency rules, international card network (PCI-DSS) controls, and EU AI Act transparency requirements simultaneously. Building compliance in rather than bolting it on eliminates gaps at audit time.' },
+            { point: 'Why XGBoost over pure rules?', tradeoff: 'A hand-weighted scorer reaches 0.79 PR-AUC but at recall 0.19 — it misses most returns. XGBoost reaches 0.8067 PR-AUC at recall 0.774, +0.11 over the best naive baseline, because it learns nonlinear feature interactions the rules cannot encode.' },
+            { point: 'Why a cost-optimized gate?', tradeoff: 'Return review is a cost decision: a wrong MEDIUM flag costs ₹200 of operator time, a wrong HIGH block costs ₹3,180 (lost order + CAC + churn) — ~16× more. The gate optimizes precision where it is cheapest, not accuracy globally.' },
+            { point: 'Why the 0.50 gate?', tradeoff: 'On a 10k-order fashion merchant, 0.50 maximizes net savings (₹17.5L/month, ROI 34.9%) — balancing flag rate 45.3%, precision 0.677, recall 0.774. Low-return verticals move to 0.60–0.70.' },
+            { point: 'Why a hand-weighted fallback?', tradeoff: 'An interpretable, deterministic composite guarantees business continuity and a defensible audit trail when the model drifts or data degrades — the same primary/fallback split as the credit engine.' },
         ],
         metrics: [
-            { value: '<50ms', label: 'p50 Latency', detail: 'L1+L2 scoring path' },
-            { value: '14', label: 'Agents', detail: 'reflection · critic · mitigation' },
-            { value: '3-layer', label: 'Compliance', detail: 'PCI-DSS · RBI · EU AI Act' },
-            { value: 'GNN+L1', label: 'Fusion Score', detail: 'isotonic calibrated P(fraud)' },
+            { value: '0.807', label: 'PR-AUC', detail: 'offline XGBoost, 2K hold-out' },
+            { value: '₹17.5L', label: '/month saved', detail: '0.50 gate, 10k orders' },
+            { value: '0.677/0.774', label: 'Precision/Recall', detail: 'at the 0.50 review gate' },
+            { value: '7', label: 'Features', detail: 'Redis + computed + lookup' },
         ],
     },
 ];
@@ -1091,28 +1091,28 @@ const PayShieldCaseStudyModal = ({ onClose }) => {
                     <div>
                         <div className="sd-modal-section-title">Overview</div>
                         <div className="sd-modal-text">
-                            PayShield is a real-time UPI fraud detection engine combining a 3-layer scoring architecture with a 14-agent orchestration framework. L1 statistical rules (velocity, geo-velocity, Benford's Law) gate 12 configurable checks in under 5ms. L2 PyTorch Geometric GNN scores the heterogeneous fraud graph (Users, Merchants, Devices, Transactions). L3 Ollama LLM investigation runs asynchronously via Celery — keeping p50 scoring latency under 50ms while generating full evidence narratives in the background.
+                            PayShield is a return-risk scorer for Indian e-commerce. It scores every order before it ships — triggered by the Razorpay order.paid webhook — and routes each order to a tier (LOW → ship, MEDIUM → flag for review, HIGH → require prepaid). An offline XGBoost model reaches 0.8067 PR-AUC on a non-circular synthetic DGP with hidden confounders, and the config-driven 0.50 review gate saves a fashion merchant ₹17.5L/month on 10,000 orders. Honest prototype: a student PoC on Razorpay's infrastructure, not production software.
                         </div>
                     </div>
                     <div>
                         <div className="sd-modal-section-title">System Architecture</div>
                         <div className="sd-modal-grid">
                             <div className="sd-modal-grid-card">
-                                <div className="sd-modal-grid-card-title">3-Layer Scoring Pipeline</div>
+                                <div className="sd-modal-grid-card-title">7-Feature Engine</div>
                                 <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>
-                                    L1 statistical filter applies 12 YAML-configurable rules (6 velocity, 4 geo, 2 Benford). Passing transactions go to L2 GNN inference over the Neo4j fraud graph. Fusion engine combines both scores with isotonic calibration into a final P(fraud). BLOCK triggers a WebSocket alert immediately.
+                                    user_return_rate_30d/90d (dominant signal, Redis history), txn_amount_risk (log-normalised AOV), txn_category_return_baseline (lookup/zset), user_cod_refusal_rate, user_return_velocity_7d (return burst), user_serial_returner_flag. Every feature carries value, weight, and source tag in the API response.
                                 </div>
                             </div>
                             <div className="sd-modal-grid-card">
-                                <div className="sd-modal-grid-card-title">Heterogeneous GNN</div>
+                                <div className="sd-modal-grid-card-title">XGBoost Primary + Fallback</div>
                                 <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>
-                                    PyTorch Geometric models four node types (User, Merchant, Device, Transaction) with typed edges. Captures ring fraud patterns — shared device fingerprints, velocity rings, merchant collusion — that are invisible to per-transaction rule systems. GNNExplainer + SHAP bridge produces evidence subgraphs per decision.
+                                    200 trees, max_depth=3, lr=0.05, scale_pos_weight=1.5 — learns nonlinear interactions from noisy, incomplete signal (PR-AUC 0.8067). A transparent hand-weighted composite (PR-AUC 0.79) is the always-available, interpretable fallback when ML drifts or data degrades.
                                 </div>
                             </div>
                             <div className="sd-modal-grid-card">
-                                <div className="sd-modal-grid-card-title">14-Agent Framework</div>
+                                <div className="sd-modal-grid-card-title">Cost-Driven Decision Gate</div>
                                 <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>
-                                    Reflection agent clusters FPs nightly and auto-tunes thresholds. Critic agent evaluates decision quality. Human-review agent ingests analyst feedback. Mitigation agent executes automated responses. Collective agent coordinates swarm. Validation, planner, profile, transaction, memory, and monitoring agents handle the full lifecycle.
+                                    A wrong MEDIUM flag costs ₹200 of operator time (the order still ships); a wrong HIGH block costs ₹3,180 (lost order + CAC + churn) — review is ~16× cheaper than blocking. The gate optimizes precision at the review tier, and thresholds are config-driven per vertical (configs/return_risk_rules.yaml).
                                 </div>
                             </div>
                         </div>
@@ -1127,39 +1127,39 @@ const PayShieldCaseStudyModal = ({ onClose }) => {
                                     </marker>
                                 </defs>
                                 <rect x="20" y="30" width="120" height="50" rx="6" fill="rgba(19,22,27,0.8)" stroke="#E7C38A" strokeWidth="1.5"/>
-                                <text x="80" y="54" fill="#fff" fontSize="10" fontWeight="bold" textAnchor="middle">POST /v1/score</text>
-                                <text x="80" y="68" fill="#9CA3AF" fontSize="8" textAnchor="middle">API Key + RBAC</text>
+                                <text x="80" y="52" fill="#fff" fontSize="10" fontWeight="bold" textAnchor="middle">order.paid</text>
+                                <text x="80" y="66" fill="#9CA3AF" fontSize="8" textAnchor="middle">Razorpay webhook</text>
                                 <rect x="175" y="30" width="130" height="50" rx="6" fill="rgba(19,22,27,0.8)" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
-                                <text x="240" y="54" fill="#fff" fontSize="10" fontWeight="bold" textAnchor="middle">L1: Statistical</text>
-                                <text x="240" y="68" fill="#9CA3AF" fontSize="8" textAnchor="middle">velocity · geo · Benford</text>
-                                <rect x="340" y="30" width="120" height="50" rx="6" fill="rgba(19,22,27,0.8)" stroke="#E7C38A" strokeWidth="1.5"/>
-                                <text x="400" y="50" fill="#E7C38A" fontSize="10" fontWeight="bold" textAnchor="middle">Decision Gate</text>
-                                <text x="400" y="64" fill="#9CA3AF" fontSize="8" textAnchor="middle">BLOCK / ESCALATE</text>
-                                <text x="400" y="75" fill="#9CA3AF" fontSize="7" textAnchor="middle">WS alert on BLOCK</text>
+                                <text x="240" y="54" fill="#fff" fontSize="10" fontWeight="bold" textAnchor="middle">POST /v1/return/score</text>
+                                <text x="240" y="68" fill="#9CA3AF" fontSize="8" textAnchor="middle">API Key + RBAC</text>
+                                <rect x="340" y="30" width="120" height="50" rx="6" fill="rgba(19,22,27,0.8)" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
+                                <text x="400" y="54" fill="#fff" fontSize="10" fontWeight="bold" textAnchor="middle">Feature Engine</text>
+                                <text x="400" y="68" fill="#9CA3AF" fontSize="8" textAnchor="middle">7 features</text>
                                 <rect x="495" y="30" width="130" height="50" rx="6" fill="rgba(19,22,27,0.8)" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
-                                <text x="560" y="54" fill="#fff" fontSize="10" fontWeight="bold" textAnchor="middle">L2: GNN</text>
-                                <text x="560" y="68" fill="#9CA3AF" fontSize="8" textAnchor="middle">PyTorch Geometric</text>
+                                <text x="560" y="54" fill="#fff" fontSize="10" fontWeight="bold" textAnchor="middle">Rules Engine</text>
+                                <text x="560" y="68" fill="#9CA3AF" fontSize="8" textAnchor="middle">8 YAML config rules</text>
                                 <rect x="660" y="30" width="120" height="50" rx="6" fill="rgba(19,22,27,0.8)" stroke="#E7C38A" strokeWidth="1.5"/>
-                                <text x="720" y="54" fill="#fff" fontSize="10" fontWeight="bold" textAnchor="middle">Fusion + Calib</text>
-                                <text x="720" y="68" fill="#9CA3AF" fontSize="8" textAnchor="middle">isotonic P(fraud)</text>
+                                <text x="720" y="50" fill="#E7C38A" fontSize="10" fontWeight="bold" textAnchor="middle">Decision Gate</text>
+                                <text x="720" y="64" fill="#9CA3AF" fontSize="8" textAnchor="middle">LOW / MEDIUM / HIGH</text>
+                                <text x="720" y="75" fill="#9CA3AF" fontSize="7" textAnchor="middle">ship · review · prepaid</text>
                                 <rect x="340" y="150" width="320" height="50" rx="6" fill="rgba(19,22,27,0.8)" stroke="rgba(255,255,255,0.1)" strokeWidth="1"/>
-                                <text x="500" y="173" fill="#fff" fontSize="10" fontWeight="bold" textAnchor="middle">L3: Ollama LLM Investigation (async)</text>
-                                <text x="500" y="187" fill="#9CA3AF" fontSize="8" textAnchor="middle">llama3.1:8b · Celery · evidence · SHAP · graph context</text>
+                                <text x="500" y="173" fill="#fff" fontSize="10" fontWeight="bold" textAnchor="middle">XGBoost Primary (200 trees, tuned)</text>
+                                <text x="500" y="187" fill="#9CA3AF" fontSize="8" textAnchor="middle">PR-AUC 0.8067 · nonlinear interactions</text>
                                 <rect x="20" y="150" width="280" height="50" rx="6" fill="rgba(19,22,27,0.8)" stroke="rgba(255,255,255,0.1)" strokeWidth="1"/>
-                                <text x="160" y="173" fill="#fff" fontSize="10" fontWeight="bold" textAnchor="middle">14-Agent Framework</text>
-                                <text x="160" y="187" fill="#9CA3AF" fontSize="8" textAnchor="middle">reflection · critic · human-review · mitigation</text>
+                                <text x="160" y="173" fill="#fff" fontSize="10" fontWeight="bold" textAnchor="middle">Fallback: Hand-Weighted Composite</text>
+                                <text x="160" y="187" fill="#9CA3AF" fontSize="8" textAnchor="middle">transparent · interpretable · always on</text>
                                 <rect x="20" y="265" width="200" height="45" rx="6" fill="rgba(19,22,27,0.8)" stroke="rgba(255,255,255,0.1)" strokeWidth="1"/>
-                                <text x="120" y="286" fill="#fff" fontSize="10" textAnchor="middle">Neo4j Fraud Graph</text>
-                                <text x="120" y="300" fill="#9CA3AF" fontSize="8" textAnchor="middle">User · Merchant · Device · Txn</text>
+                                <text x="120" y="286" fill="#fff" fontSize="10" textAnchor="middle">Redis Store</text>
+                                <text x="120" y="300" fill="#9CA3AF" fontSize="8" textAnchor="middle">user history · merchant baselines</text>
                                 <rect x="250" y="265" width="160" height="45" rx="6" fill="rgba(19,22,27,0.8)" stroke="rgba(255,255,255,0.1)" strokeWidth="1"/>
-                                <text x="330" y="286" fill="#fff" fontSize="10" textAnchor="middle">PostgreSQL</text>
-                                <text x="330" y="300" fill="#9CA3AF" fontSize="8" textAnchor="middle">audit · investigations</text>
+                                <text x="330" y="286" fill="#fff" fontSize="10" textAnchor="middle">YAML Config</text>
+                                <text x="330" y="300" fill="#9CA3AF" fontSize="8" textAnchor="middle">rules · gate per vertical</text>
                                 <rect x="440" y="265" width="160" height="45" rx="6" fill="rgba(19,22,27,0.8)" stroke="rgba(255,255,255,0.1)" strokeWidth="1"/>
-                                <text x="520" y="286" fill="#fff" fontSize="10" textAnchor="middle">Redis</text>
-                                <text x="520" y="300" fill="#9CA3AF" fontSize="8" textAnchor="middle">cache · broker · feature store</text>
+                                <text x="520" y="286" fill="#fff" fontSize="10" textAnchor="middle">Drift Monitor</text>
+                                <text x="520" y="300" fill="#9CA3AF" fontSize="8" textAnchor="middle">PSI on feature surface</text>
                                 <rect x="630" y="265" width="150" height="45" rx="6" fill="rgba(19,22,27,0.8)" stroke="rgba(255,255,255,0.1)" strokeWidth="1"/>
-                                <text x="705" y="286" fill="#fff" fontSize="10" textAnchor="middle">Compliance Stack</text>
-                                <text x="705" y="300" fill="#9CA3AF" fontSize="8" textAnchor="middle">PCI-DSS · RBI · EU AI Act</text>
+                                <text x="705" y="286" fill="#fff" fontSize="10" textAnchor="middle">Audit Chain</text>
+                                <text x="705" y="300" fill="#9CA3AF" fontSize="8" textAnchor="middle">hash-chained JSONL</text>
                                 <line x1="140" y1="55" x2="175" y2="55" stroke="#E7C38A" strokeWidth="1.2" markerEnd="url(#arrowP)"/>
                                 <line x1="305" y1="55" x2="340" y2="55" stroke="#E7C38A" strokeWidth="1.2" markerEnd="url(#arrowP)"/>
                                 <line x1="460" y1="55" x2="495" y2="55" stroke="#E7C38A" strokeWidth="1.2" markerEnd="url(#arrowP)"/>
@@ -1172,28 +1172,28 @@ const PayShieldCaseStudyModal = ({ onClose }) => {
                     <div>
                         <div className="sd-modal-section-title">Data Flow (Scoring Lifecycle)</div>
                         <ul className="sd-modal-list">
-                            <li><strong>Intake:</strong> POST /v1/score validates the API key, enforces rate limits, and passes the transaction to the statistical filter.</li>
-                            <li><strong>L1 Filter:</strong> 12 YAML-configurable rules run synchronously. A BLOCK here triggers a WebSocket alert immediately and queues an LLM investigation via Celery — response returns in under 5ms.</li>
-                            <li><strong>L2 GNN:</strong> Passing transactions are enriched with entity features from the Redis feature store (or Neo4j for non-cached entities) and scored by the heterogeneous GNN.</li>
-                            <li><strong>Fusion:</strong> Weighted L1 + L2 scores are combined and passed through isotonic calibration to produce a final P(fraud). Decision gate applies environment-specific thresholds (dev/prod YAML).</li>
-                            <li><strong>Async Investigation:</strong> BLOCK and REVIEW decisions queue an Ollama LLM investigation task. The Celery worker collects evidence (L1 triggers, L2 features, SHAP values, graph context) and generates a structured investigation report stored in PostgreSQL.</li>
-                            <li><strong>Feedback Loop:</strong> Analyst feedback via the human-review agent feeds the reflection agent's nightly FP clustering. Statistically significant threshold adjustments are promoted via the A/B experimentation framework.</li>
+                            <li><strong>Ingestion:</strong> Razorpay order.paid webhook fires POST /v1/return/score with API key auth. The scorer validates the order and pulls the user/merchant profile from Redis.</li>
+                            <li><strong>Feature Engine:</strong> 7 features are computed — return rates 30d/90d from Redis history, log-normalised amount risk, category baseline from lookup/zset, COD refusal rate, 7-day return velocity, and the serial-returner flag.</li>
+                            <li><strong>Rules Engine:</strong> 8 YAML-configurable rules gate known patterns before ML; thresholds hot-reload without a restart.</li>
+                            <li><strong>XGBoost Primary:</strong> 200 tuned trees produce a calibrated P(return), capturing nonlinear interactions between the noisy features. The hand-weighted composite serves as fallback.</li>
+                            <li><strong>Cost-Driven Gate:</strong> The 0.50 gate maps scores to LOW (ship) / MEDIUM (flag for review, ₹200) / HIGH (require prepaid, ₹3,180). Thresholds are config-driven per vertical.</li>
+                            <li><strong>Feedback Loop:</strong> Return events POST /v1/return/update refresh the profile; PSI drift monitors the feature surface and the champion/challenger harness compares model versions.</li>
                         </ul>
                     </div>
                     <div>
                         <div className="sd-modal-section-title">Engineering Decisions</div>
                         <div className="sd-modal-grid">
                             <div className="sd-modal-grid-card">
-                                <div className="sd-modal-grid-card-title">Why a heterogeneous GNN?</div>
-                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>Per-transaction rules miss ring fraud: shared device fingerprints across accounts, velocity rings, and merchant collusion patterns require reasoning across multiple entity types simultaneously. A graph over User/Merchant/Device/Transaction nodes captures these cross-entity signals in a single forward pass.</div>
+                                <div className="sd-modal-grid-card-title">Why XGBoost over rules?</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>A hand-weighted scorer reaches 0.79 PR-AUC but at recall 0.19 — it misses most returns. XGBoost reaches 0.8067 PR-AUC at recall 0.774 because it learns nonlinear interactions the rules cannot encode.</div>
                             </div>
                             <div className="sd-modal-grid-card">
-                                <div className="sd-modal-grid-card-title">Why async L3 LLM?</div>
-                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>Ollama inference takes 2–10s. Blocking the scoring path would violate the sub-100ms SLA on every BLOCK decision. Celery decouples investigation from decision — BLOCK is immediate, the narrative report is generated in the background and retrievable via GET /v1/investigation/{'{'}txn_id{'}'} .</div>
+                                <div className="sd-modal-grid-card-title">Why cost-optimized gating?</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>Review is ~16× cheaper than blocking (₹200 vs ₹3,180). The 0.50 gate maximizes net savings (₹17.5L/month, ROI 34.9%) rather than optimizing accuracy globally — a cost decision, not a contest.</div>
                             </div>
                             <div className="sd-modal-grid-card">
-                                <div className="sd-modal-grid-card-title">Why 14 agents?</div>
-                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>A monolithic scorer cannot self-correct. The reflection agent clusters false positives nightly and auto-tunes rule thresholds. The critic agent evaluates decision quality independently. Human-review and mitigation agents handle edge cases. Each concern is isolated, testable, and independently replaceable.</div>
+                                <div className="sd-modal-grid-card-title">Why a hand-weighted fallback?</div>
+                                <div className="sd-modal-text" style={{ fontSize: '12.5px' }}>An interpretable deterministic composite guarantees business continuity and a defensible audit trail when the model drifts or data degrades — the same primary/fallback split as the credit engine.</div>
                             </div>
                         </div>
                     </div>
@@ -1201,12 +1201,12 @@ const PayShieldCaseStudyModal = ({ onClose }) => {
                         <div className="sd-modal-section-title">Technologies & Tools</div>
                         <table className="sd-modal-tech-table">
                             <tbody>
-                                <tr><td className="sd-modal-tech-label">API & Worker</td><td>Python · FastAPI · Celery · Redis · Uvicorn</td></tr>
-                                <tr><td className="sd-modal-tech-label">ML & Graph</td><td>PyTorch Geometric · SHAP · GNNExplainer · scikit-learn · Isotonic Calibration</td></tr>
-                                <tr><td className="sd-modal-tech-label">LLM</td><td>Ollama (llama3.1:8b) · Async Celery worker · structlog</td></tr>
-                                <tr><td className="sd-modal-tech-label">Databases</td><td>PostgreSQL · Neo4j · Redis · SQLAlchemy · Alembic</td></tr>
-                                <tr><td className="sd-modal-tech-label">Compliance</td><td>PCI-DSS · RBI localization · EU AI Act · OFAC/UN sanctions · AML · KYC</td></tr>
-                                <tr><td className="sd-modal-tech-label">Frontend & Ops</td><td>Vite · React · TypeScript · Kubernetes · Prometheus · Grafana · ArgoCD</td></tr>
+                                <tr><td className="sd-modal-tech-label">API & Worker</td><td>Python · FastAPI · Uvicorn · Razorpay (order.paid webhooks)</td></tr>
+                                <tr><td className="sd-modal-tech-label">ML</td><td>XGBoost · PR-AUC evaluation · hyperparameter tuning · hand-weighted composite fallback</td></tr>
+                                <tr><td className="sd-modal-tech-label">Data & State</td><td>Redis (user history · merchant baselines · return zsets) · feature engine · lookup tables</td></tr>
+                                <tr><td className="sd-modal-tech-label">Config & Ops</td><td>YAML rules + gate thresholds (hot-reload) · Docker Compose hermetic stack · audit chain</td></tr>
+                                <tr><td className="sd-modal-tech-label">Observability</td><td>PSI drift monitoring · ablation + tuning scripts · cost-model calculator · live scenario verification</td></tr>
+                                <tr><td className="sd-modal-tech-label">Out of scope (PoC)</td><td>PCI-DSS · RBI · EU AI Act certification · fraud (GNN) & chargeback extensions (unmeasured)</td></tr>
                             </tbody>
                         </table>
                     </div>
