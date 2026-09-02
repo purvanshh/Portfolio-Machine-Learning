@@ -21,6 +21,17 @@ Graph-aware RAG for code understanding: tree-sitter AST parsing → symbol-level
 ### [ALICe](https://github.com/purvanshh/AuditLend-Intelligence-Core--ALICe-)
 Auditable credit decision engine with XGBoost ML scoring (0.975 AUC-ROC) and deterministic heuristic fallbacks. Features transactional outbox pattern, circuit breakers, immutable audit trail via PostgreSQL triggers, and SHAP explainability. 187 tests at 86% coverage.
 
+### [PayShield](https://github.com/purvanshh/PayShield)
+Return-risk scorer for Indian e-commerce. Scores every order before it ships via a Razorpay `order.paid` webhook → 7-feature XGBoost pipeline → LOW / MEDIUM / HIGH tier (ship / review / prepaid-only). Evaluated across three Progressive Merchant Maturity scenarios with identical model architecture:
+
+| Stage | Merchant segment | PR-AUC | ROC-AUC | ₹/month (Electronics) | ₹/month (Fashion) |
+|---|---|---|---|---|---|
+| **Stage 1: Basic** | high hidden variance | **0.7991** | **0.8431** | ₹36.8L | ₹17.4L |
+| **Stage 2: Enriched** | rating + delivery observed | **0.8834** | **0.9198** | ₹44.7L | ₹21.4L |
+| **Stage 3: Premium** | mature instrumentation | **0.9497** | **0.9612** | **₹53.5L** | **₹26.0L** |
+
+Stage 1 is the honest conservative floor: trained on a non-circular synthetic DGP with hidden confounders (product rating, delivery speed, packaging, weather, customer mood) the model never observes. The 0.50 review gate saves **₹17.4L/month** on 10k fashion orders (precision 0.644, recall 0.812, ROI 34.5%) — a 34.5% reduction of the ₹50.31L/month return bleed. Tuned champion (HalvingGridSearchCV): PR-AUC 0.8089 / ROC-AUC 0.8477. Features a live React dashboard, four agent workers (transaction / profile / reflection / human-review) with Redis heartbeats, PSI drift monitoring, and config-driven per-vertical gate thresholds.
+
 ## System Design
 
 Architecture deep-dives for every flagship system — now including DRISE — with pipeline flows, failure paths, decision logic, support systems, engineering tradeoffs, case-study detail, and impact metrics.
